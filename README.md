@@ -2,14 +2,10 @@
 
 **Automated structured evidence quality evaluation for clinical and biomedical research papers.**
 
-Built on the [SciSpark](https://scispark.ai) EvidenceScore pipeline (v2) — a 6-stage agentic system that mirrors the reasoning of a trained Evidence-Based Medicine (EBM) reviewer. Drop in any paper; get a comprehensive, auditable evidence report back.
+Built on the [SciSpark](https://scispark.ai) EvidenceScore pipeline — a 6-stage agentic system that mirrors the reasoning of a trained Evidence-Based Medicine (EBM) reviewer. Drop in any paper; get a comprehensive, auditable evidence report back.
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Tests](https://img.shields.io/badge/Acceptance%20Tests-8%2F8%20passing-brightgreen)
-![Math Tests](https://img.shields.io/badge/Math%20Unit%20Tests-21%2F21%20passing-brightgreen)
-![Stage 3](https://img.shields.io/badge/Stage%203%20Module%20Tests-147%2F147%20passing-brightgreen)
-![Stage 5](https://img.shields.io/badge/Stage%205%20Module%20Tests-60%2F60%20passing-brightgreen)
 ![Status](https://img.shields.io/badge/Status-Pre--launch-orange)
 
 ---
@@ -240,5 +236,5 @@ Minimum viable paper: **3E + 3C + 3A + 3B**.
 
 ---
 
-*Built by [SciSpark] · [team@scispark.ai](mailto:team@scispark.ai)*
+*Built by SciSpark team· [team@scispark.ai](mailto:team@scispark.ai)*
 *Stanford · Pre-launch · March 2026*
