@@ -22,16 +22,22 @@ python tests/experiment_3B_math_unit_tests.py
 # scenarios, study type routing, de-duplication, test-retest, total delta
 # end-to-end, and published FI validation (Walsh et al. 2014)
 python tests/test_stage3_math.py
+
+# Stage 5 module tests — 60 tests: score rule engine, boundary matrix,
+# de-duplication caps (QUADAS-2, GRADE), LTFU floor pierce, phase_0_1 lock,
+# report assembly, exclusion handling, special case formatting
+python tests/test_stage5_report.py
 ```
 
 Tests use a custom pass/fail counter (not pytest). They print results to stdout with checkmark/cross indicators.
 
 ## Architecture
 
-The repo is a **skill specification + reference library + Stage 3 implementation**:
+The repo is a **skill specification + reference library + Stage 3 & 5 implementations**:
 
 - `SKILL.md` — Entry point. Defines the full pipeline, stage execution order, de-duplication rules, and output format. This is what the agent reads to run an evaluation.
 - `pipeline/stage3_math.py` — **Implemented.** Deterministic math audit module (no LLM). Exports `run_stage3()` as the top-level entry point, plus individual functions: `compute_fragility_index`, `compute_ltfu_fi_rule`, `compute_fragility_quotient`, `compute_nnt`, `compute_nnt_threshold_delta`, `compute_posthoc_power_binary`, `compute_posthoc_power_continuous`, `compute_dor`, `deduplicate_statistical_stability`. Routes by study type (diagnostic → DOR only; observational → no power; phase_0_1 → skip).
+- `pipeline/stage5_report.py` — **Implemented.** Score rule engine + structured report assembly. Exports `compute_suggested_score()` (collects deltas, applies cross-stage de-duplication, enforces boundary matrix with LTFU floor pierce and phase_0_1 lock) and `assemble_report()` (formats all stage outputs into plain-text report with exclusion/disclaimer handling). Also exports `deduplicate_stage4_deltas()` for QUADAS-2 cap, GRADE upgrade cap, and case-control overlap de-duplication.
 - `references/` — Stage-specific specifications the agent reads before executing each stage:
   - `stages_0_1.md` — Stage 0 (study type routing) + Stage 1 (variable extraction with 3× CoT majority vote)
   - `stages_2_3.md` — Stage 2 (agentic MCID search, up to 5 rounds) + Stage 3 (deterministic math audit)
@@ -51,5 +57,6 @@ The repo is a **skill specification + reference library + Stage 3 implementation
 ## Tech Context
 
 - Stage 3 math is deterministic Python (scipy, statsmodels, numpy) — no LLM involvement
-- Stages 1, 2, 4, 5 use LLM (Claude Sonnet via GMI Cloud OpenAI-compatible API)
+- Stage 5 score engine and report assembly are deterministic Python — no LLM involvement (the narrative summary is an agent task)
+- Stages 0, 1, 2, 4 are agent reasoning tasks — the agent follows reference docs, no Python modules needed
 - Tiered context strategy: abstract + methods + conclusion first (Tier 1); only escalate to full text on `needs_full_paper: true`

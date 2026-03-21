@@ -9,6 +9,7 @@ Built on the [SciSpark](https://scispark.ai) EvidenceScore pipeline (v2) — a 6
 ![Tests](https://img.shields.io/badge/Acceptance%20Tests-8%2F8%20passing-brightgreen)
 ![Math Tests](https://img.shields.io/badge/Math%20Unit%20Tests-21%2F21%20passing-brightgreen)
 ![Stage 3](https://img.shields.io/badge/Stage%203%20Module%20Tests-147%2F147%20passing-brightgreen)
+![Stage 5](https://img.shields.io/badge/Stage%205%20Module%20Tests-60%2F60%20passing-brightgreen)
 ![Status](https://img.shields.io/badge/Status-Pre--launch-orange)
 
 ---
@@ -137,7 +138,8 @@ evidence_report_[first_author]_[year]_[pmid].md
 evidence_evaluator/
 ├── SKILL.md                              ← Agent skill entry point
 ├── pipeline/
-│   └── stage3_math.py                    ← Stage 3: deterministic math audit module
+│   ├── stage3_math.py                    ← Stage 3: deterministic math audit module
+│   └── stage5_report.py                  ← Stage 5: score rule engine + report assembly
 ├── references/
 │   ├── stages_0_1.md                     ← Stage 0: routing · Stage 1: extraction
 │   ├── stages_2_3.md                     ← Stage 2: MCID search · Stage 3: math audit
@@ -148,7 +150,8 @@ evidence_evaluator/
 └── tests/
     ├── acceptance_tests_T1_T8.py         ← 8 scenario tests · all pass ✅
     ├── experiment_3B_math_unit_tests.py  ← Stage 3 math unit tests · 21/21 correct ✅
-    └── test_stage3_math.py              ← Stage 3 module tests · 147/147 passing ✅
+    ├── test_stage3_math.py              ← Stage 3 module tests · 147/147 passing ✅
+    └── test_stage5_report.py            ← Stage 5 module tests · 60/60 passing ✅
 ```
 
 ---
@@ -169,6 +172,10 @@ python tests/experiment_3B_math_unit_tests.py
 # study type routing, de-duplication, test-retest, total delta end-to-end,
 # published FI validation against Walsh et al. 2014)
 python tests/test_stage3_math.py
+
+# Stage 5 module tests (60 tests: score rule engine, boundary matrix,
+# de-duplication caps, LTFU floor pierce, report assembly, special cases)
+python tests/test_stage5_report.py
 ```
 
 ### Acceptance test coverage
