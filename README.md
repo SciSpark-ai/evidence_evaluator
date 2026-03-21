@@ -224,15 +224,5 @@ Minimum viable paper: **3E + 3C + 3A + 3B**.
 
 ---
 
-## Publication Target
-
-**Primary:** *npj Digital Medicine* (Quicker published here Dec 2025, vol. 8, art. 793 — same journal, same clinical informatics community)
-
-**Secondary:** ML4H (NeurIPS Workshop) · CHIL · AMIA · JAMIA
-
-**Proposed title:** *"Automated Structured Evidence Evaluation of Clinical Research Papers Using Multi-Agent LLMs"*
-
----
-
-*Built by [SciSpark](https://scispark.ai) · [team@scispark.ai](mailto:team@scispark.ai)*
-*Stanford Psychiatry Department · Pre-launch · March 2026*
+*Built by [SciSpark] · [team@scispark.ai](mailto:team@scispark.ai)*
+*Stanford · Pre-launch · March 2026*
