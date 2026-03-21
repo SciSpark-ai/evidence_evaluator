@@ -38,8 +38,8 @@ If this fails, check that you are running from the `evidence_evaluator/` repo ro
 
 1. **Receive paper** — PDF upload, pasted abstract/text, DOI, or PMID
 2. **Run stages 0–5 sequentially** — each stage feeds the next via a shared `PipelineContext`
-3. **Output report** — structured JSON + 500–800 word narrative summary
-4. **Optional** — append heuristic suggested score (1–5) with explicit disclaimer
+3. **Export full report** — save as Markdown file (`evidence_report_[author]_[year]_[pmid].md`)
+4. **Reply with brief summary** — score + key findings + path to the exported file
 
 Read the stage references before running each stage:
 - `references/stages_0_1.md` — Study type routing + variable extraction
@@ -222,9 +222,16 @@ report = assemble_report(
 print(report)
 ```
 
-**Part 2 — Narrative Summary (LLM):** Write 500–800 words for clinician audience. Cover findings, not verdict. Do not render a final judgment — let the clinician decide.
+**Part 2 — Markdown Export (default):** Always export the full report as a `.md` file using the template in `references/stage_5_report.md → Part 5`. Include: all 4 structured sections, the 500–800 word narrative summary (findings only, no verdict), and the optional score with disclaimer. Save to: `evidence_report_[first_author]_[year]_[pmid].md`
 
-**Part 3 — Optional Markdown Export:** If user requests `output_format: markdown`, render using the template in `references/stage_5_report.md → Part 5`.
+**Part 3 — Chat summary:** After saving the Markdown file, respond to the user with a **brief summary** (not the full report). Include:
+- Paper title and study type
+- Score (if enabled) with one-line rationale
+- 2–3 key findings (e.g., "FI = 62 (robust)", "NNT = 20 (favorable)", "All RoB 2.0 domains low")
+- Any flags or concerns (LTFU > FI, low confidence fields, Tier 4 MCID proxy)
+- Path to the exported Markdown file
+
+Do NOT paste the full report into the chat. The Markdown file is the deliverable; the chat message is a summary pointing to it.
 
 ---
 
