@@ -16,6 +16,7 @@ skills/evidence-evaluator/
   pipeline/stage5_report.py         ← Stage 5: score engine + report assembly
   references/                       ← Stage specs, formulas, eval framework
 tests/                              ← Development only (not part of skill package)
+paper/                              ← Claw4S conference research note + pilot results
 ```
 
 ## Running Tests
@@ -36,12 +37,19 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - `skills/evidence-evaluator/pipeline/stage5_report.py` — Score rule engine + report assembly. Exports `compute_suggested_score()`, `assemble_report()`, `deduplicate_stage4_deltas()`.
 - `skills/evidence-evaluator/references/` — Stage specs the agent reads before executing each stage.
 - `tests/` — Dev-only validation tests (not part of installed skill).
+- `paper/` — Claw4S 2026 conference submission (research note, pilot results, submission script).
 
 ## Key Domain Rules
 
+- **LTFU definition**: Includes exclusions + withdrawals + AE-related dropouts (all attrition sources). Deaths counted as primary endpoint events are NOT LTFU.
 - **LTFU > FI hard rule**: LTFU exceeds FI → −2 grades, no exceptions, never deduplicated
-- **De-duplication**: {power < 0.80, N < domain standard, NNT > threshold} → only most severe applies
+- **MCID derivation**: Follow tier hierarchy strictly (Tier 1→2→3→4, stop at first hit). For Tier 3 HR thresholds, convert to ARR via `CER × (1 − HR)` using Stage 1 CER. Document the full derivation chain.
+- **Effect vs MCID**: Binary only (exceeds or below). No "borderline" category.
+- **De-duplication**: {power < 0.80, N < domain standard, NNT > threshold} → apply only the one with largest absolute delta; if equal, apply any one. Document which were suppressed.
+- **Domain N**: Agent-searched via PubMed/FDA, not a fixed table. If not found, skip deduction.
+- **NNT threshold**: Agentic search takes priority over reference table. If domain not in table and search finds nothing, skip deduction.
 - **Study type routing**: `phase_0_1` skips Stages 2+3, locks score 1–2; `diagnostic` uses QUADAS-2 + DOR
+- **Initial grade**: N takes precedence over phase label. Grade 5 requires ALL of: multi-center + double-blind + N > 1000.
 - **Score disclaimer**: 1–5 score is heuristic, pending expert calibration — always display disclaimer
 
 ## Tech Context
@@ -49,3 +57,4 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - Stage 3 and Stage 5 score engine are deterministic Python (scipy, statsmodels, numpy)
 - Stages 0, 1, 2, 4 are agent reasoning tasks — no Python modules needed
 - All Python commands must run from `skills/evidence-evaluator/` directory for imports to resolve
+- Reference docs in `references/` contain explicit signaling questions (RoB 2.0), classification tables (effect size type, surrogate endpoint, objective/subjective outcome), and fallback hierarchies (NNT threshold, domain N) to minimize agent interpretation variance
