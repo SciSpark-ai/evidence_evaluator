@@ -157,13 +157,13 @@ We ran Evidence Evaluator end-to-end on five papers, one per major study type, t
 
 | Paper | Type | Key Metrics | Score | Notable Findings |
 |---|---|---|---|---|
-| DAPA-HF (McMurray 2019) | RCT | FI=62, NNT=20.4, Power=40.4% | 4/5 | FI robust; power blocks Score 5 prerequisite |
+| DAPA-HF (McMurray 2019) | RCT | FI=62, NNT=20.4, Power=93.9% | 5/5 | All Score 5 prerequisites met; FI exceptionally robust |
 | FIT meta-analysis (Lee 2014) | Diagnostic | DOR=57.42 (CI: 32.25--102.24) | 4/5 | High discrimination; heterogeneity $-1$ via QUADAS-2 |
 | JUPITER (Ridker 2008) | Preventive | FI=67, NNT=81.7, Power=99.4% | 5/5 | All Score 5 prerequisites met; early stopping noted |
 | Doll & Hill 1950 | Observational | FI=18, OR=14.04, GRADE +1 | 4/5 | GRADE upgrade capped +1; ceiling at Grade 4 |
 | Topalian 2012 (anti-PD-1) | Phase 0/I | Stages 2+3 skipped | 2/5 | Score locked 1--2; Phase 0/I disclaimer shown |
 
-**DAPA-HF.** The Fragility Index of 62 confirms exceptional statistical robustness -- more than 60 patient events would need to change to nullify the primary result. The power flag (40.4% at MCID) is a conservative artifact: the trial's observed absolute risk reduction of 4.9% is approximately $2.5\times$ the MCID target, so the study detected a real and clinically meaningful effect despite appearing underpowered relative to the minimum difference. All five RoB 2.0 domains were rated low risk.
+**DAPA-HF.** The Fragility Index of 62 confirms exceptional statistical robustness -- more than 60 patient events would need to change to nullify the primary result. Post-hoc power of 93.9% at the MCID (ARR 4%, derived from the ESC/FDA HR $\leq$ 0.80 convention via $\text{ARR} = \text{CER} \times (1 - \text{HR}) = 0.212 \times 0.20 = 0.042$) confirms the study was well-designed to detect clinically meaningful differences. All five RoB 2.0 domains were rated low risk, and all Score 5 prerequisites were met.
 
 **FIT meta-analysis.** A Diagnostic Odds Ratio of 57.42 (95% CI: 32.25--102.24) indicates strong discrimination for fecal immunochemical testing. The sole deduction arose from heterogeneity across included studies (sensitivity range 0.70--0.89), which triggered a $-1$ adjustment. QUADAS-2 was correctly selected over RoB 2.0, confirming the diagnostic routing path.
 

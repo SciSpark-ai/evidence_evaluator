@@ -24,8 +24,10 @@ Agentic iterative retrieval (up to 5 rounds). Start from Stage 1's `pico_search_
 |---|---|---|
 | 1 | COMET Initiative, OMERACT, IMMPACT, FDA CDER/EMA CHMP | Direct citation — no inference |
 | 2 | PubMed systematic reviews — query: `"minimum clinically important difference"[Title] AND [disease]` | Use with citation |
-| 3 | Major specialty guidelines: ASCO/ESMO, AHA/ESC, ACR/EULAR, AAN/EAN, KDIGO, IASP | Use with citation |
+| 3 | Major specialty guidelines: ASCO/ESMO, AHA/ESC, ACR/EULAR, AAN/EAN, KDIGO, IASP | Use with citation. If expressed as HR, convert to ARR: `ARR = CER × (1 − HR)` using Stage 1 CER. |
 | 4 | Statistical proxy: Cohen's d = 0.5 | **Must label:** *"MCID not found in specialty literature; using Cohen's d = 0.5 as conservative estimate. Interpret with caution."* |
+
+**Tier 3 conversion example (cardiovascular):** ESC/FDA convention for HF outcome trials uses HR ≤ 0.80 as the powering threshold. If CER = 21.2%, then MCID = 0.212 × 0.20 = 0.042 → ARR ≈ 4%. Do NOT invent arbitrary thresholds (e.g., "ARR 2%") without a documented guideline source. The conversion must use the actual CER from Stage 1 to produce a study-specific ARR.
 
 ## Deductions from Stage 2
 
