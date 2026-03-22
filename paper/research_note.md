@@ -159,7 +159,7 @@ We ran Evidence Evaluator end-to-end on five papers, one per major study type, t
 |---|---|---|---|---|
 | DAPA-HF (McMurray 2019) | RCT | FI=62, NNT=20.4, Power=93.9% | 5/5 | All Score 5 prerequisites met; FI exceptionally robust |
 | FIT meta-analysis (Lee 2014) | Diagnostic | DOR=57.42 (CI: 32.25--102.24) | 4/5 | High discrimination; heterogeneity $-1$ via QUADAS-2 |
-| JUPITER (Ridker 2008) | Preventive | FI=67, NNT=81.7, Power=99.4% | 5/5 | All Score 5 prerequisites met; early stopping noted |
+| JUPITER (Ridker 2008) | Preventive | FI=67, NNT=81.7, Power=85.5% | 5/5 | All Score 5 prerequisites met; early stopping noted |
 | Doll & Hill 1950 | Observational | FI=18, OR=14.04, GRADE +1 | 4/5 | GRADE upgrade capped +1; ceiling at Grade 4 |
 | Topalian 2012 (anti-PD-1) | Phase 0/I | Stages 2+3 skipped | 2/5 | Score locked 1--2; Phase 0/I disclaimer shown |
 
@@ -167,7 +167,7 @@ We ran Evidence Evaluator end-to-end on five papers, one per major study type, t
 
 **FIT meta-analysis.** A Diagnostic Odds Ratio of 57.42 (95% CI: 32.25--102.24) indicates strong discrimination for fecal immunochemical testing. The sole deduction arose from heterogeneity across included studies (sensitivity range 0.70--0.89), which triggered a $-1$ adjustment. QUADAS-2 was correctly selected over RoB 2.0, confirming the diagnostic routing path.
 
-**JUPITER.** This trial met every Score 5 prerequisite: $FI = 67$, power $= 99.4\%$, all bias domains rated low, and hard clinical endpoints. The NNT of 81.7 falls within the 200 threshold for primary cardiovascular prevention. Early stopping was conducted per pre-specified Data Safety Monitoring Board boundaries and did not trigger a deduction.
+**JUPITER.** This trial met every Score 5 prerequisite: $FI = 67$, power $= 85.5\%$ (at MCID = ARR 0.7%, derived from the trial's own HR $\leq$ 0.75 powering convention), all bias domains rated low, and hard clinical endpoints. The NNT of 81.7 falls within the 200 threshold for primary cardiovascular prevention. Early stopping was conducted per pre-specified Data Safety Monitoring Board boundaries and did not trigger a deduction.
 
 **Doll & Hill.** The GRADE upgrade was triggered by three factors: $OR = 14.04$ (large effect size), a dose-response gradient, and plausible confounders favoring the null. The pipeline correctly enforced the cap of $+1$ maximum upgrade and the Grade 3 ceiling of 4 for observational designs. $FI = 18$ indicates robustness despite the modest sample size by modern standards.
 
