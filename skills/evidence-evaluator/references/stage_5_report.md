@@ -36,7 +36,7 @@ SECTION 3 — CLINICAL BENCHMARKING  [Stage 2]
   MCID: [value] [units]
   Source: [database] (Tier [1–4])
   [Tier 4 only: ⚠ No specialty MCID found — Cohen's d proxy used. Interpret with caution.]
-  Observed effect: [value]  vs. MCID → [exceeds | below | borderline | n/a]
+  Observed effect: [value]  vs. MCID → [exceeds | below | n/a]
 
 SECTION 4 — BIAS RISK ASSESSMENT  [Stage 4]
   Tool: [RoB 2.0 | QUADAS-2 | GRADE]
@@ -81,7 +81,7 @@ These rules prevent double-counting the same underlying limitation:
 
 | Rule | Detail |
 |---|---|
-| **Statistical stability dimension** | Among {power < 0.80, N < domain standard, NNT > threshold} → apply **only the most severe** single deduction |
+| **Statistical stability dimension** | Among {power < 0.80, N < domain standard, NNT > threshold} → apply **only one** deduction (the one with the largest absolute delta; if equal, apply any one). Suppress the others and document which were suppressed. |
 | **Diagnostic case-control overlap** | Stage 2 case-control deduction + QUADAS-2 patient selection = same bias → apply once |
 | **QUADAS-2 cap** | Raw domain deductions capped at −2 total |
 | **GRADE upgrade cap** | Capped at +1 total regardless of factors met |

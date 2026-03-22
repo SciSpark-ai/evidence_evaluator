@@ -29,6 +29,16 @@ Agentic iterative retrieval (up to 5 rounds). Start from Stage 1's `pico_search_
 
 **Tier 3 conversion example (cardiovascular):** ESC/FDA convention for HF outcome trials uses HR ≤ 0.80 as the powering threshold. If CER = 21.2%, then MCID = 0.212 × 0.20 = 0.042 → ARR ≈ 4%. Do NOT invent arbitrary thresholds (e.g., "ARR 2%") without a documented guideline source. The conversion must use the actual CER from Stage 1 to produce a study-specific ARR.
 
+## Domain Standard N — Search Instruction
+
+The "domain standard N" is NOT a fixed lookup — it is determined by agentic search during Stage 2. Search for the typical sample size of trials at the same phase and indication:
+
+**Search strategy:** Query PubMed for recent systematic reviews or meta-analyses in the same disease-outcome pair. Look for the median or typical sample size of included trials. Alternatively, check FDA guidance documents for the indication, which often specify minimum enrollment expectations.
+
+**If no domain standard is found:** Do not apply the N < domain deduction. Document: "No domain standard N found for [indication]; N deduction not applied."
+
+**Always document:** The domain N value, its source, and how it was derived.
+
 ## Deductions from Stage 2
 
 | Finding | Deduction | Rationale |
@@ -37,7 +47,9 @@ Agentic iterative retrieval (up to 5 rounds). Start from Stage 1's `pico_search_
 | N < domain standard N | −1 grade | Underpowered relative to field norms |
 | NNT > domain threshold | −1 grade | Benefit rate too low for clinical justification |
 
-**De-duplication:** {power < 0.8, N < domain standard, NNT > threshold} → only most severe applies (Stage 5).
+**Effect vs. MCID is binary:** If observed effect ≥ MCID → "exceeds" (no deduction). If observed effect < MCID → "below" (−1 deduction). There is no "borderline" category — this eliminates agent interpretation variance at the threshold.
+
+**De-duplication:** {power < 0.8, N < domain standard, NNT > threshold} share the same statistical stability dimension. In Stage 5, apply ONLY the single deduction with the largest absolute value. If all three are −1, apply any one and suppress the other two (they are equivalent). Document which was applied and which were suppressed.
 
 ## Preventive Study NNT Reference Thresholds
 
@@ -49,6 +61,8 @@ Agentic iterative retrieval (up to 5 rounds). Start from Stage 1's `pico_search_
 | Infectious disease prevention (vaccines) | 20–100 |
 | Stroke secondary prevention | 15–50 |
 | Osteoporosis fracture prevention | 30–100 |
+
+**NNT threshold priority:** (1) Use the evidence-based NNT consensus value found during agentic search — if found, the table above is void. (2) If no evidence-based value is found, use the table above as a conservative fallback. (3) If the indication is not in the table, do NOT apply the NNT threshold deduction — document: "No NNT threshold available for [indication]; NNT deduction not applied." **Always state the source of the NNT threshold used in the report.**
 
 ## Diagnostic Thresholds (replaces MCID for diagnostic studies)
 

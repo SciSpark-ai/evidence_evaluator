@@ -19,15 +19,42 @@ Use Tier 1 (abstract + methods + conclusion) first. For most RoB 2.0 domains (ra
 
 ## RoB 2.0 — for RCT / meta-analysis / preventive
 
-| Domain | What to Look For | Deduction |
-|---|---|---|
-| Randomization process | Allocation concealment details, sequence generation method | High risk: −1; Critical (unblinded + subjective outcome): −2 |
-| Deviations from intervention | Protocol adherence, crossover rates, co-interventions | High risk: −1 |
-| Missing outcome data | LTFU rates, imputation method (LOCF, MCAR, MNAR) | High risk: −1 |
-| Measurement of outcome | Blinding of outcome assessors, objective vs. subjective outcome | Subjective + unblinded: −2 |
-| Selection of reported results | Trial registration match, pre-specified vs. exploratory outcomes | High risk: −1 |
+### Per-Domain Signaling Questions
 
-**For Phase 0/I:** Run ONLY randomization process + selection of reported results. Skip all others.
+For each domain, answer the signaling questions below. If the paper does not report the information needed to answer a question, mark it as `some_concerns` (absence of reporting ≠ absence of bias).
+
+**Domain 1 — Randomization process** (Deduction: high risk −1; critical −2)
+- Q1: Was the allocation sequence random? (Look for: "computer-generated", "random number table", "coin toss". NOT acceptable: "alternation", "date of birth", "medical record number")
+- Q2: Was the allocation sequence concealed until enrollment? (Look for: "central randomization", "IVRS/IWRS", "sequentially numbered sealed opaque envelopes". NOT acceptable: "open allocation list", no mention of concealment)
+- **Low:** Both Q1 and Q2 answered yes with evidence. **Some concerns:** One answered yes, one unclear. **High:** Either answered no. **Critical:** No randomization AND subjective unblinded outcome.
+
+**Domain 2 — Deviations from intervention** (Deduction: high risk −1)
+- Q1: Were participants aware of their assigned intervention? (Double-blind = low risk)
+- Q2: Were there significant crossovers or co-interventions? (Look for: crossover rate > 10%, unbalanced co-interventions)
+- Q3: Was the analysis intention-to-treat? (Per-protocol only = some concerns)
+- **Low:** Double-blind + ITT + no significant crossover. **Some concerns:** Open-label but ITT with low crossover. **High:** Open-label + per-protocol or significant crossover.
+
+**Domain 3 — Missing outcome data** (Deduction: high risk −1)
+- Q1: Were outcome data available for ≥ 95% of randomized participants?
+- Q2: Was there differential missingness between arms (> 5% difference)?
+- Q3: Was an appropriate method used for missing data (multiple imputation, sensitivity analysis)?
+- **Low:** ≥ 95% complete + no differential missingness. **Some concerns:** 90–95% complete or minor differential. **High:** < 90% complete or large differential without sensitivity analysis.
+
+**Domain 4 — Measurement of outcome** (Deduction: subjective + unblinded −2; high risk −1)
+- Q1: Was the outcome objective or subjective?
+  - **Objective:** Death, hospitalization, lab values, imaging with automated measurement — events that do not depend on assessor judgment
+  - **Subjective:** Patient-reported scores (pain VAS, PHQ-9), clinician-rated scales (PANSS, CGI), physician global assessment
+  - **Semi-objective:** Adjudicated events (e.g., blinded endpoint committee reviewing clinical events) — classify as OBJECTIVE
+- Q2: Were outcome assessors blinded?
+- **Low:** Objective outcome (blinding irrelevant) OR subjective + blinded assessors. **Some concerns:** Subjective + assessors not described. **High:** Subjective + confirmed unblinded assessors. **Critical:** Subjective + unblinded + no objective verification → −2.
+
+**Domain 5 — Selection of reported results** (Deduction: high risk −1)
+- Q1: Was the trial pre-registered (ClinicalTrials.gov, ISRCTN, etc.)?
+- Q2: Does the published primary endpoint match the registration?
+- Q3: Are all pre-specified secondary endpoints reported?
+- **Low:** Pre-registered + primary matches + secondaries reported. **Some concerns:** Registered but minor discrepancies. **High:** Not registered, or primary endpoint changed without justification, or selective secondary endpoint reporting.
+
+**For Phase 0/I:** Run ONLY Domain 1 (randomization) + Domain 5 (selection of reported results). Skip all others.
 
 Judgment levels: `low | some_concerns | high | critical`
 
@@ -69,10 +96,18 @@ Judgment levels: `low | some_concerns | high | critical`
 ## Additional Checks (all study types)
 
 ### Surrogate Endpoint
-If the primary outcome is a biomarker proxy rather than a hard clinical endpoint (e.g., HbA1c instead of cardiovascular events, tumor response instead of overall survival):
+If the primary outcome is a biomarker proxy rather than a hard clinical endpoint:
 → **−1 grade** (applied once; not duplicated)
 
-Examples of surrogate endpoints: blood pressure, cholesterol levels, PSA, radiological response, HbA1c, CD4 count, viral load (depends on context).
+**Classification rule:** Compare the primary outcome from Stage 1 against the domain's accepted hard clinical endpoints from Stage 2. If the primary outcome is NOT a hard clinical endpoint for that disease, it is a surrogate.
+
+| Classification | Examples | Rule |
+|---|---|---|
+| **Hard endpoint** (not surrogate) | All-cause mortality, cardiovascular death, hospitalization, stroke, MI, fracture, disease-free survival | Directly measures patient-important outcomes |
+| **Surrogate** (−1 applies) | HbA1c, blood pressure, cholesterol, PSA, tumor response (RECIST), CD4 count, viral load, bone mineral density | Biomarker proxy for a hard endpoint |
+| **Validated surrogate** (−1 still applies, but flag) | Progression-free survival in some oncology settings, eGFR decline in nephrology | Has regulatory acceptance but is still a proxy — apply −1 but note validation status |
+
+**Context does NOT change the classification.** A biomarker is a surrogate regardless of whether the trial's mechanism targets it directly. HbA1c is a surrogate even in an antihyperglycemic trial — the question is whether the *patient* benefits (CV events, mortality), not whether the *drug* works on the biomarker.
 
 ### Meta-Analysis Inconsistency
 If I² > 50% with no subgroup explanation or pre-specified heterogeneity analysis:

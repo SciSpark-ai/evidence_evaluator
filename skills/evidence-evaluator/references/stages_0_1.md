@@ -72,10 +72,10 @@ Always use **Tier 1** first: abstract + methods + conclusion. If an agent pass r
     "n_control": null,
     "events_intervention": null,
     "events_control": null,
-    "ltfu_count": null,
+    "ltfu_count": null,            // LTFU = exclusions + withdrawals + AE-related dropouts (all causes of attrition)
     "p_value": null,
     "effect_size": null,
-    "effect_size_type": "RR | OR | HR | SMD | MD | AUC | null",
+    "effect_size_type": "binary | continuous | SMD | MD | null",  // binary = events in 2x2 table (use for FI/NNT); continuous = means+SDs (use for SMD power); SMD = standardized mean difference; MD = mean difference
     "ci_lower": null,
     "ci_upper": null,
     "multicenter": false,
@@ -115,15 +115,44 @@ Always use **Tier 1** first: abstract + methods + conclusion. If an agent pass r
 }
 ```
 
+## LTFU Definition (critical for LTFU-FI rule)
+
+LTFU (lost to follow-up) includes ALL sources of attrition that remove patients from the analysis:
+- **Exclusions** after randomization (protocol violations, found ineligible)
+- **Withdrawals** (patient withdrew consent, withdrew for personal reasons)
+- **Adverse-event-related dropouts** (discontinued due to side effects)
+- **Administrative losses** (moved, unreachable, death from non-study cause if not counted as event)
+
+**How to extract:** Look for the CONSORT flow diagram or the "Participants" section of Results. Sum all patients randomized minus all patients in the final ITT analysis. If the paper reports "vital status ascertained for X%", compute: `LTFU = N_total × (1 − X/100)`.
+
+**Do NOT count** as LTFU: deaths that are part of the primary endpoint (these are events, not losses).
+
+## Effect Size Type Classification
+
+The `effect_size_type` field determines which power calculation method Stage 3 uses. Apply these rules:
+
+| If the primary outcome is... | Set `effect_size_type` to | Stage 3 power method |
+|---|---|---|
+| Binary (events/no events, 2×2 table available) | `binary` | `proportion_effectsize` → `NormalIndPower` |
+| Continuous (means ± SDs in each arm) | `continuous` | `TTestIndPower` with SMD |
+| Reported as SMD/Cohen's d (meta-analysis) | `SMD` | `TTestIndPower` with reported SMD |
+| Reported as mean difference (same units) | `MD` | Convert to SMD using pooled SD, then `TTestIndPower` |
+
+**When the paper reports both HR and events:** Use `binary` (events are extractable from the 2×2 table). HR is the reported effect size, but FI/NNT computation uses the raw event counts.
+
+**When the paper reports only HR without event counts:** Set `effect_size_type` to `binary` and flag `needs_full_paper: true` to extract the events table.
+
 ## Initial Grade Table (Intervention / Meta-Analysis Studies)
 
-| Grade | Study Design Criteria |
-|---|---|
-| 1 | Expert consensus, physiological theory, narrative review |
-| 2 | Case series, case reports, low-quality cross-sectional, Phase 0/I |
-| 3 | Small RCT (Phase IIa, N < 100), retrospective cohort, case-control |
-| 4 | Medium RCT (Phase IIb, N 100–1000) or high-quality prospective cohort |
-| 5 | High-quality meta-analysis, large multi-center double-blind RCT (Phase III, N > 1000) |
+| Grade | Study Design Criteria | Decision Rule |
+|---|---|---|
+| 1 | Expert consensus, physiological theory, narrative review | No primary data |
+| 2 | Case series, case reports, low-quality cross-sectional, Phase 0/I | Phase 0/I always = Grade 2 regardless of N |
+| 3 | Small RCT (N < 100), retrospective cohort, case-control | N is the deciding factor for RCTs; phase label is secondary |
+| 4 | Medium RCT (N 100–1000) or high-quality prospective cohort | "High-quality" = prospective + pre-registered + ≥1 year follow-up |
+| 5 | Large multi-center double-blind RCT (Phase III, N > 1000), or high-quality meta-analysis | Must meet ALL: multi-center AND double-blind AND N > 1000 |
+
+**Grade assignment priority:** N takes precedence over phase label. A Phase IIb trial with N = 50 is Grade 3 (N < 100), not Grade 4. A Phase IIa trial with N = 200 is Grade 4 (N 100–1000), not Grade 3. Single-center or open-label trials with N > 1000 are Grade 4 (not Grade 5 — missing multi-center or double-blind requirement).
 
 ## Diagnostic Study Grade Table
 
