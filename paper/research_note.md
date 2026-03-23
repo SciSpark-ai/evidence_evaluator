@@ -1,8 +1,8 @@
 # Evidence Evaluator: Executable Evidence-Based Medicine Review as an Agent Skill
 
-**Claw 🦞\*, Tong Shan\*, Lei Li\***
+**Cu's CCbot 🦞\*, Tong Shan\*, Lei Li\***
 *\* Co-first authors*
-Stanford / SciSpark
+Stanford School of Medicine / SciSpark.ai
 
 ---
 
@@ -62,48 +62,116 @@ To manage token cost without sacrificing extraction quality, the pipeline employ
 
 ### Pipeline Diagram
 
-```mermaid
-flowchart TD
-    INPUT[/"Input: PDF / DOI / PMID / Text"/]
-    INPUT --> S0
-
-    S0["Stage 0 — Study Type Routing\n(LLM classification)"]
-
-    S0 -->|"RCT / preventive /\nobservational / meta-analysis"| S1_FULL
-    S0 -->|diagnostic| S1_DIAG
-    S0 -->|"phase 0/I"| S1_PHASE
-
-    S1_FULL["Stage 1 — Variable Extraction\n(LLM · 3x majority vote · PICO)"]
-    S1_DIAG["Stage 1 — Variable Extraction\n(LLM · 3x majority vote · PICO)"]
-    S1_PHASE["Stage 1 — Variable Extraction\n(LLM · 3x majority vote · PICO)"]
-
-    S1_FULL --> S2_FULL["Stage 2 — MCID Search\n(LLM + agentic web search)"]
-    S2_FULL --> S3_FULL["Stage 3 — Math Audit\n(Python · NO LLM)\nFI · NNT · post-hoc power"]:::deter
-
-    S1_DIAG --> S2_DIAG["Stage 2 — MCID Search\n(LLM + agentic web search)"]
-    S2_DIAG --> S3_DIAG["Stage 3 — Math Audit\n(Python · NO LLM)\nDOR · sensitivity · specificity"]:::deter
-
-    S1_PHASE -.->|"skip Stages 2-3\n(score locked 1-2)"| S4_PHASE
-
-    S3_FULL --> S4_FULL["Stage 4 — Bias Risk\n(LLM)\nRoB 2.0 · GRADE"]
-    S3_DIAG --> S4_DIAG["Stage 4 — Bias Risk\n(LLM)\nQUADAS-2"]
-    S4_PHASE["Stage 4 — Bias Risk\n(LLM)\nDescriptive review only"]
-
-    S4_FULL --> S5
-    S4_DIAG --> S5
-    S4_PHASE --> S5
-
-    S5["Stage 5 — Report Synthesis\n(Python rule engine + LLM narrative)\nStructured findings · optional 1-5 score"]:::hybrid
-
-    S5 --> OUTPUT[/"Evidence Evaluation Report\n(JSON + Markdown)"/]
-
-    classDef default fill:#e3f2fd,stroke:#1565c0,stroke-width:1.5px,color:#0d47a1
-    classDef deter fill:#e8f5e9,stroke:#2e7d32,stroke-width:1.5px,color:#1b5e20
-    classDef hybrid fill:#fff8e1,stroke:#f9a825,stroke-width:1.5px,color:#e65100
-    classDef io fill:#e8eaf6,stroke:#3949ab,stroke-width:2px,color:#1a237e
-
-    class INPUT,OUTPUT io
-```
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 920" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#555"/></marker>
+    <marker id="arrow-dash" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#999"/></marker>
+  </defs>
+  <!-- INPUT -->
+  <rect x="280" y="10" width="260" height="36" rx="4" fill="#e8eaf6" stroke="#3949ab" stroke-width="2"/>
+  <text x="410" y="33" text-anchor="middle" fill="#1a237e" font-weight="600">Input: PDF / DOI / PMID / Text</text>
+  <!-- Arrow INPUT→S0 -->
+  <line x1="410" y1="46" x2="410" y2="70" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S0 -->
+  <rect x="250" y="72" width="320" height="44" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="410" y="90" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 0 — Study Type Routing</text>
+  <text x="410" y="106" text-anchor="middle" fill="#0d47a1">(LLM classification)</text>
+  <!-- Arrows S0 → three S1 boxes -->
+  <line x1="310" y1="116" x2="140" y2="155" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="190" y="130" fill="#555" font-size="10">RCT / preventive /</text>
+  <text x="190" y="141" fill="#555" font-size="10">observational / meta</text>
+  <line x1="410" y1="116" x2="410" y2="155" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="430" y="140" fill="#555" font-size="10">diagnostic</text>
+  <line x1="510" y1="116" x2="680" y2="155" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="620" y="130" fill="#555" font-size="10">phase 0/I</text>
+  <!-- S1 FULL -->
+  <rect x="20" y="158" width="240" height="44" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="140" y="176" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 1 — Extraction</text>
+  <text x="140" y="192" text-anchor="middle" fill="#0d47a1">(LLM · 3x vote · PICO)</text>
+  <!-- S1 DIAG -->
+  <rect x="290" y="158" width="240" height="44" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="410" y="176" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 1 — Extraction</text>
+  <text x="410" y="192" text-anchor="middle" fill="#0d47a1">(LLM · 3x vote · PICO)</text>
+  <!-- S1 PHASE -->
+  <rect x="560" y="158" width="240" height="44" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="680" y="176" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 1 — Extraction</text>
+  <text x="680" y="192" text-anchor="middle" fill="#0d47a1">(LLM · 3x vote · PICO)</text>
+  <!-- S1_FULL → S2_FULL -->
+  <line x1="140" y1="202" x2="140" y2="250" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S2 FULL -->
+  <rect x="20" y="253" width="240" height="44" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="140" y="271" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 2 — MCID Search</text>
+  <text x="140" y="287" text-anchor="middle" fill="#0d47a1">(LLM + agentic web search)</text>
+  <!-- S1_DIAG → S2_DIAG -->
+  <line x1="410" y1="202" x2="410" y2="250" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S2 DIAG -->
+  <rect x="290" y="253" width="240" height="44" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="410" y="271" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 2 — MCID Search</text>
+  <text x="410" y="287" text-anchor="middle" fill="#0d47a1">(LLM + agentic web search)</text>
+  <!-- S1_PHASE -.-> S4_PHASE (dashed skip) -->
+  <line x1="680" y1="202" x2="680" y2="535" stroke="#999" stroke-width="1.5" stroke-dasharray="8,4" marker-end="url(#arrow-dash)"/>
+  <text x="700" y="370" fill="#999" font-size="10" font-style="italic">skip Stages 2–3</text>
+  <text x="700" y="382" fill="#999" font-size="10" font-style="italic">(score locked 1–2)</text>
+  <!-- S2_FULL → S3_FULL -->
+  <line x1="140" y1="297" x2="140" y2="345" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S3 FULL (green) -->
+  <rect x="20" y="348" width="240" height="56" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="140" y="366" text-anchor="middle" fill="#1b5e20" font-weight="600">Stage 3 — Math Audit</text>
+  <text x="140" y="382" text-anchor="middle" fill="#1b5e20">(Python · NO LLM)</text>
+  <text x="140" y="396" text-anchor="middle" fill="#1b5e20">FI · NNT · post-hoc power</text>
+  <!-- S2_DIAG → S3_DIAG -->
+  <line x1="410" y1="297" x2="410" y2="345" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S3 DIAG (green) -->
+  <rect x="290" y="348" width="240" height="56" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="410" y="366" text-anchor="middle" fill="#1b5e20" font-weight="600">Stage 3 — Math Audit</text>
+  <text x="410" y="382" text-anchor="middle" fill="#1b5e20">(Python · NO LLM)</text>
+  <text x="410" y="396" text-anchor="middle" fill="#1b5e20">DOR · sensitivity · specificity</text>
+  <!-- S3_FULL → S4_FULL -->
+  <line x1="140" y1="404" x2="140" y2="535" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S3_DIAG → S4_DIAG -->
+  <line x1="410" y1="404" x2="410" y2="535" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S4 FULL -->
+  <rect x="20" y="538" width="240" height="56" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="140" y="556" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 4 — Bias Risk</text>
+  <text x="140" y="572" text-anchor="middle" fill="#0d47a1">(LLM)</text>
+  <text x="140" y="586" text-anchor="middle" fill="#0d47a1">RoB 2.0 · GRADE</text>
+  <!-- S4 DIAG -->
+  <rect x="290" y="538" width="240" height="56" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="410" y="556" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 4 — Bias Risk</text>
+  <text x="410" y="572" text-anchor="middle" fill="#0d47a1">(LLM)</text>
+  <text x="410" y="586" text-anchor="middle" fill="#0d47a1">QUADAS-2</text>
+  <!-- S4 PHASE -->
+  <rect x="560" y="538" width="240" height="56" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="680" y="556" text-anchor="middle" fill="#0d47a1" font-weight="600">Stage 4 — Bias Risk</text>
+  <text x="680" y="572" text-anchor="middle" fill="#0d47a1">(LLM)</text>
+  <text x="680" y="586" text-anchor="middle" fill="#0d47a1">Descriptive review only</text>
+  <!-- S4s → S5 -->
+  <line x1="140" y1="594" x2="410" y2="650" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="410" y1="594" x2="410" y2="650" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="680" y1="594" x2="410" y2="650" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- S5 (amber/hybrid) -->
+  <rect x="230" y="653" width="360" height="56" rx="6" fill="#fff8e1" stroke="#f9a825" stroke-width="1.5"/>
+  <text x="410" y="671" text-anchor="middle" fill="#e65100" font-weight="600">Stage 5 — Report Synthesis</text>
+  <text x="410" y="687" text-anchor="middle" fill="#e65100">(Python rule engine + LLM narrative)</text>
+  <text x="410" y="701" text-anchor="middle" fill="#e65100">Structured findings · optional 1–5 score</text>
+  <!-- S5 → OUTPUT -->
+  <line x1="410" y1="709" x2="410" y2="745" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- OUTPUT -->
+  <rect x="260" y="748" width="300" height="44" rx="4" fill="#e8eaf6" stroke="#3949ab" stroke-width="2"/>
+  <text x="410" y="766" text-anchor="middle" fill="#1a237e" font-weight="600">Evidence Evaluation Report</text>
+  <text x="410" y="782" text-anchor="middle" fill="#1a237e">(JSON + Markdown)</text>
+  <!-- Legend -->
+  <rect x="20" y="840" width="16" height="16" rx="3" fill="#e3f2fd" stroke="#1565c0" stroke-width="1"/>
+  <text x="42" y="853" fill="#555" font-size="11">LLM-driven</text>
+  <rect x="140" y="840" width="16" height="16" rx="3" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="162" y="853" fill="#555" font-size="11">Deterministic Python</text>
+  <rect x="310" y="840" width="16" height="16" rx="3" fill="#fff8e1" stroke="#f9a825" stroke-width="1"/>
+  <text x="332" y="853" fill="#555" font-size="11">Hybrid (rule engine + LLM)</text>
+  <rect x="530" y="840" width="16" height="16" rx="3" fill="#e8eaf6" stroke="#3949ab" stroke-width="1"/>
+  <text x="552" y="853" fill="#555" font-size="11">Input / Output</text>
+  <line x1="680" y1="848" x2="720" y2="848" stroke="#999" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="726" y="853" fill="#555" font-size="11">Skip path</text>
+</svg>
 
 **Figure 1.** Evidence Evaluator pipeline architecture. Blue stages are LLM-driven, green stages execute deterministic Python, and the amber stage (report synthesis) is a hybrid of rule-engine scoring and LLM narrative generation. Phase 0/I studies bypass Stages 2--3 via the dashed path.
 
@@ -216,4 +284,6 @@ Future work will run the full 3A--3F experiments at scale against Cochrane-revie
 
 ---
 
-*Generated by SciSpark Evidence Evaluator · [scispark.ai](https://scispark.ai)*
+**GitHub:** https://github.com/SciSpark-ai/evidence_evaluator
+
+**Install:** `npx skills add SciSpark-ai/evidence_evaluator`

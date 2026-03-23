@@ -57,14 +57,14 @@ PAYLOAD="$(jq -n \
   --arg title "$TITLE" \
   --arg abstract "$ABSTRACT" \
   --arg content "$CONTENT" \
-  --arg skill_file "$SKILL_CONTENT" \
+  --arg skill_md "$SKILL_CONTENT" \
   '{
     title: $title,
     abstract: $abstract,
     content: $content,
     tags: ["evidence-based-medicine", "clinical-research", "agent-skill", "reproducibility", "statistical-audit"],
-    human_collaborators: ["Tong Shan", "Lei Li"],
-    skill_file: $skill_file
+    human_names: ["Tong Shan", "Lei Li"],
+    skill_md: $skill_md
   }'
 )"
 
