@@ -4,7 +4,7 @@
 **Authors:** Ridker PM, Danielson E, Fonseca FAH, Genest J, Gotto AM Jr, Kastelein JJP, et al.
 **Journal:** New England Journal of Medicine · **Year:** 2008 · **PMID:** 18997196
 **Study type:** preventive · **Routing confidence:** 99%
-**Generated:** 2026-03-21 · **Pipeline:** SciSpark Evidence Evaluator
+**Generated:** 2026-03-23 · **Pipeline:** SciSpark Evidence Evaluator
 
 ---
 
@@ -110,20 +110,52 @@ No Tier 1 (anchor-based patient-reported) or Tier 2 (established published MCID)
 
 ### Per-Domain Findings
 
-| Domain | Judgment | Delta | Evidence |
-|---|---|---|---|
-| Randomization process | low | 0 | Computer-generated randomization with concealed allocation via interactive voice-response system. 1:1 ratio, stratified by center. |
-| Deviations from intervention | low | 0 | Double-blind with matched placebo. Protocol adherence monitored centrally. Low crossover rate. |
-| Missing outcome data | low | 0 | Vital status known for >97% of participants at trial termination. Primary endpoint ascertainment near-complete through national registry linkage. Estimated 25 patients with truly unknown primary endpoint status. |
-| Measurement of outcome | low | 0 | Hard clinical endpoints (MI, stroke, cardiovascular death, revascularization) adjudicated by a blinded independent endpoint committee. Objective outcomes not susceptible to assessor bias. |
-| Selection of reported results | some_concerns | 0 | Trial stopped early by independent DSMB after median 1.9 years of planned 5 years, based on exceeding pre-specified stopping boundary (Haybittle-Peto threshold). Early stopping may overestimate treatment effects. Primary endpoint was pre-specified and registered (NCT00239681). Classified as "some_concerns" rather than "high" because stopping followed a pre-specified rule and the primary endpoint was not changed. |
+**Domain 1 — Randomization process:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the allocation sequence random? | Yes | Computer-generated randomization sequence |
+| Q2: Was the allocation sequence concealed until enrollment? | Yes | Concealed allocation via interactive voice-response system; 1:1 ratio, stratified by center |
+
+**Domain 2 — Deviations from intended interventions:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Were participants aware of their assigned intervention? | No | Double-blind with matched placebo |
+| Q2: Were there significant crossovers or co-interventions? | No | Protocol adherence monitored centrally; low crossover rate |
+| Q3: Was the analysis intention-to-treat? | Yes | ITT analysis |
+
+**Domain 3 — Missing outcome data:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Were outcome data available for ≥ 95% of randomized participants? | Yes | Vital status known for >97%; ~25 patients with unknown primary endpoint status |
+| Q2: Was there differential missingness between arms (> 5% difference)? | No | No differential missingness reported |
+| Q3: Was an appropriate method used for missing data? | Yes | National registry linkage for endpoint ascertainment |
+
+**Domain 4 — Measurement of outcome:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the outcome objective or subjective? | Objective | Hard clinical endpoints (MI, stroke, CV death, revascularization). Adjudicated events → classify as OBJECTIVE |
+| Q2: Were outcome assessors blinded? | Yes | Blinded independent endpoint committee adjudication |
+
+**Domain 5 — Selection of reported results:** 🟡 some_concerns (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the trial pre-registered? | Yes | NCT00239681 |
+| Q2: Does the published primary endpoint match the registration? | Yes | Primary composite endpoint unchanged |
+| Q3: Are all pre-specified secondary endpoints reported? | Yes | All pre-specified endpoints reported |
+
+Early stopping concern: Trial stopped by independent DSMB after median 1.9 years of planned 5 years, upon exceeding the pre-specified Haybittle-Peto stopping boundary. Early stopping may overestimate treatment effects. Classified as "some_concerns" rather than "high" because the stopping rule was pre-specified and the primary endpoint was not changed. No deduction applied at the "some_concerns" level.
 
 **Additional checks**
 
 | Check | Finding | Delta |
 |---|---|---|
-| Surrogate endpoint | no — composite of hard clinical events | 0 |
-| Meta-analysis I-squared | n/a | 0 |
+| Surrogate endpoint | 🟢 No — hard clinical composite (MI, stroke, CV death, revascularization). Classification: **hard endpoint** | 0 |
+| Meta-analysis I² | n/a (single trial) | 0 |
 
 ---
 

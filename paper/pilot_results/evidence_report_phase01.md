@@ -4,7 +4,7 @@
 **Authors:** Topalian SL, Hodi FS, Brahmer JR, Gettinger SN, Smith DC, McDermott DF, et al.
 **Journal:** New England Journal of Medicine · **Year:** 2012 · **PMID:** 22658127
 **Study type:** phase_0_1 · **Routing confidence:** 98%
-**Generated:** 2026-03-21 · **Pipeline:** SciSpark Evidence Evaluator
+**Generated:** 2026-03-23 · **Pipeline:** SciSpark Evidence Evaluator
 
 ---
 
@@ -54,16 +54,26 @@
 
 ### Per-Domain Findings
 
-| Domain | Judgment | Delta | Evidence |
-|---|---|---|---|
-| Randomization process | not_applicable | 0 | Single-arm open-label dose-escalation design; randomization was not part of the study protocol. No allocation concealment applicable. |
-| Selection of reported results | 🟢 low | 0 | Primary endpoints (safety profile, DLTs, objective response rate) were pre-specified and comprehensively reported. All dose cohorts and tumor types were included in the results. Grade 3–4 AE rate (14%) and immune-related AEs were systematically catalogued. No evidence of selective omission. |
+**Domain 1 — Randomization process:** not_applicable (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the allocation sequence random? | N/A | Single-arm, open-label dose-escalation design; randomization was not part of the study protocol |
+| Q2: Was the allocation sequence concealed until enrollment? | N/A | No allocation to conceal; not a methodological flaw in this context |
+
+**Domain 5 — Selection of reported results:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the trial pre-registered? | Yes | Registered clinical trial (NCT00730639) |
+| Q2: Does the published primary endpoint match the registration? | Yes | Safety (AEs, DLTs) was primary; ORR was secondary/exploratory as pre-specified |
+| Q3: Are all pre-specified secondary endpoints reported? | Yes | All dose cohorts and tumor types included; Grade 3–4 AE rate (14%) and immune-related AEs systematically catalogued; no evidence of selective omission |
 
 **Additional checks**
 
 | Check | Finding | Delta |
 |---|---|---|
-| Surrogate endpoint | No — safety (AEs/DLTs) is the primary endpoint for Phase I; ORR reported as secondary/exploratory | 0 |
+| Surrogate endpoint | N/A — safety (AEs/DLTs) is the primary endpoint for Phase I; ORR reported as secondary/exploratory. Not applicable for Phase I safety studies. | 0 |
 | Meta-analysis I² | n/a | 0 |
 
 ---

@@ -5,7 +5,7 @@
 **Journal:** British Medical Journal · **Year:** 1950 · **DOI:** 10.1136/bmj.2.4682.739
 **PMID:** 14772469
 **Study type:** observational · **Routing confidence:** 98%
-**Generated:** 2026-03-21 · **Pipeline:** SciSpark Evidence Evaluator
+**Generated:** 2026-03-23 · **Pipeline:** SciSpark Evidence Evaluator
 
 ---
 
@@ -123,11 +123,17 @@ The GRADE framework specifies that observational studies may be upgraded when ef
 
 ### GRADE Upgrade Factors
 
-| Factor | Judgment | Delta | Evidence |
-|---|---|---|---|
-| Large effect size | 🟢 met | +1 | OR = 14.04 (95% CI well above 1.0); P = 1.28e-06. Far exceeds RR > 2.0 threshold. CI does not cross 1. |
-| Dose-response gradient | 🟢 met | +1 | Graded increase in lung cancer risk across 4+ cigarette consumption categories (none, 1-4, 5-14, 15-24, 25-49, 50+ per day). Monotonically increasing risk with significant trend. |
-| Plausible confounding | 🟢 met | +1 | Known confounders (occupational exposures, urban air pollution, socioeconomic factors) would bias toward the null. Despite this, OR remains 14.04. |
+**Large effect size:** 🟢 met (delta +1)
+- OR = 14.04 (95% CI well above 1.0); P = 1.28 × 10⁻⁶. Far exceeds RR > 2.0 threshold. CI does not cross 1.
+- Negative criteria check: CI is NOT wide (precise estimate); N = 1,298 > 30 (not small-sample inflation). Upgrade valid.
+
+**Dose-response gradient:** 🟢 met (delta +1)
+- Graded increase in lung cancer risk across 6 cigarette consumption categories (none, 1–4, 5–14, 15–24, 25–49, 50+ per day). Monotonically increasing risk with significant trend.
+- Negative criteria check: ≥ 3 dose groups (6 categories); relationship is monotonic (not J-shaped or U-shaped). Upgrade valid.
+
+**Plausible confounding:** 🟢 met (delta +1)
+- Known confounders (occupational exposures, urban air pollution, socioeconomic factors) would bias toward the null. Despite uncontrolled confounders favoring no association, OR remains 14.04.
+- Negative criteria check: Confounding direction is clear (toward null), not solely based on authors' assertion — the listed confounders demonstrably co-associate with both smoking and lung cancer. Upgrade valid.
 
 **GRADE upgrade cap applied:** Raw sum +3 capped to +1 (maximum allowed for observational studies).
 
@@ -143,7 +149,7 @@ The GRADE framework specifies that observational studies may be upgraded when ef
 
 | Check | Finding | Delta |
 |---|---|---|
-| Surrogate endpoint | no (lung carcinoma diagnosis is a hard clinical endpoint) | 0 |
+| Surrogate endpoint | 🟢 No — lung carcinoma diagnosis is a hard clinical endpoint. Classification: **hard endpoint** | 0 |
 | Meta-analysis I² | n/a | 0 |
 
 ---

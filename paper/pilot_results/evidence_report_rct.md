@@ -5,7 +5,7 @@
 **Journal:** New England Journal of Medicine · **Year:** 2019 · **DOI:** 10.1056/NEJMoa1911303
 **PMID:** 31535829
 **Study type:** RCT_intervention · **Routing confidence:** 99%
-**Generated:** 2026-03-21 · **Pipeline:** SciSpark Evidence Evaluator
+**Generated:** 2026-03-23 · **Pipeline:** SciSpark Evidence Evaluator
 
 ---
 
@@ -172,19 +172,51 @@ Rounded conservatively: MCID = 0.04 (ARR 4%)
 
 ### Per-Domain Findings
 
-| Domain | Judgment | Delta | Evidence |
-|---|---|---|---|
-| Randomization process | 🟢 low | 0 | Central IVRS/IWRS with computer-generated randomization sequence, stratified by diabetes status. Allocation concealment maintained via matching placebo. Balanced baseline characteristics across arms. |
-| Deviations from intended interventions | 🟢 low | 0 | Double-blind, placebo-controlled design. Drug and placebo identical in appearance. Intention-to-treat analysis. No significant crossover or co-intervention imbalances reported. |
-| Missing outcome data | 🟢 low | 0 | Vital status ascertained for 99.7% of patients (LTFU approximately 14/4,744). ITT analysis with all randomized patients included. Minimal missing data with no differential missingness between arms. |
-| Measurement of the outcome | 🟢 low | 0 | Primary endpoints are objective hard clinical endpoints (hospitalization, urgent IV therapy visit, cardiovascular death). Adjudicated by an independent blinded clinical events committee. Not susceptible to observer bias. |
-| Selection of the reported result | 🟢 low | 0 | Pre-registered on ClinicalTrials.gov (NCT03036124). Primary composite endpoint matched registration. Statistical analysis plan finalized before database lock. All pre-specified endpoints reported. |
+**Domain 1 — Randomization process:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the allocation sequence random? | Yes | Computer-generated via central IVRS/IWRS system |
+| Q2: Was the allocation sequence concealed until enrollment? | Yes | Central randomization system with stratification by diabetes status; matching placebo maintained concealment |
+
+Balanced baseline characteristics across arms confirm successful randomization.
+
+**Domain 2 — Deviations from intended interventions:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Were participants aware of their assigned intervention? | No | Double-blind; drug and placebo identical in appearance |
+| Q2: Were there significant crossovers or co-interventions? | No | No significant crossover or co-intervention imbalances reported |
+| Q3: Was the analysis intention-to-treat? | Yes | ITT analysis with all randomized patients |
+
+**Domain 3 — Missing outcome data:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Were outcome data available for ≥ 95% of randomized participants? | Yes | Vital status ascertained for 99.7% of patients (~14/4,744 unknown) |
+| Q2: Was there differential missingness between arms (> 5% difference)? | No | No differential missingness between arms |
+| Q3: Was an appropriate method used for missing data? | Yes | ITT analysis with all randomized patients included |
+
+**Domain 4 — Measurement of outcome:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the outcome objective or subjective? | Objective | Hard clinical endpoints: hospitalization, urgent IV therapy visit, cardiovascular death. Adjudicated events by blinded committee → classify as OBJECTIVE |
+| Q2: Were outcome assessors blinded? | Yes | Independent blinded clinical events committee adjudication |
+
+**Domain 5 — Selection of reported results:** 🟢 low (delta 0)
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Q1: Was the trial pre-registered? | Yes | ClinicalTrials.gov NCT03036124 |
+| Q2: Does the published primary endpoint match the registration? | Yes | Primary composite endpoint matches registration |
+| Q3: Are all pre-specified secondary endpoints reported? | Yes | Statistical analysis plan finalized before database lock; all endpoints reported |
 
 **Additional checks**
 
 | Check | Finding | Delta |
 |---|---|---|
-| Surrogate endpoint | 🟢 no — primary outcome is a hard clinical composite (HF hospitalization/urgent visit + CV death) | 0 |
+| Surrogate endpoint | 🟢 No — hard clinical composite (worsening HF hospitalization/urgent visit + CV death). Classification: **hard endpoint** | 0 |
 | Meta-analysis I² | n/a (single trial) | 0 |
 
 ---

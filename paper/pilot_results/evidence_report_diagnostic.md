@@ -4,7 +4,7 @@
 **Authors:** Lee JK, Liles EG, Bent S, Levin TR, Corley DA
 **Journal:** Annals of Internal Medicine · **Year:** 2014 · **PMID:** 24658694
 **Study type:** diagnostic · **Routing confidence:** 95%
-**Generated:** 2026-03-21 · **Pipeline:** SciSpark Evidence Evaluator
+**Generated:** 2026-03-23 · **Pipeline:** SciSpark Evidence Evaluator
 
 ---
 
@@ -94,7 +94,7 @@ Diagnostic Odds Ratio (DOR):
 | Sensitivity | 0.79 | ≥ 0.85 for high-stakes screening | 🟡 Below high-stakes threshold |
 | Specificity | 0.94 | ≥ 0.70 clinical; ≥ 0.90 excellent | 🟢 Excellent |
 | LR+ | 13.10 | > 5 clinical; > 10 strong | 🟢 Strong (> 10) |
-| LR− | 0.23 | < 0.2 good; < 0.1 excellent | 🟡 Borderline (slightly above 0.2) |
+| LR− | 0.23 | < 0.2 good; < 0.1 excellent | 🟡 Slightly above threshold (0.23 > 0.2) |
 
 **Source:** STARD/QUADAS-2 framework for diagnostic test evaluation; AUC/Sn/Sp thresholds per Stage 2 diagnostic sub-flow (reference: stages_2_3.md diagnostic thresholds table).
 
@@ -114,12 +114,17 @@ Diagnostic Odds Ratio (DOR):
 
 ### Per-Domain Findings
 
-| Domain | Judgment | Delta | Evidence |
-|---|---|---|---|
-| Patient selection | 🟡 some_concerns | 0 | Meta-analysis included 19 studies with varying enrollment strategies. Most studies enrolled consecutive or screening-eligible patients, though some used case-control designs. As a meta-analysis, the pooled estimate mitigates individual study selection biases. No automatic deduction applied given the systematic review design and the majority of studies using consecutive enrollment. |
-| Index test | 🟢 low | 0 | FIT uses a quantitative hemoglobin cutoff value for positivity determination. Index test interpretation is objective (automated analyzer reading) and not influenced by knowledge of colonoscopy results. Low risk of verification bias for the index test. |
-| Reference standard | 🟢 low | 0 | Colonoscopy is the accepted gold standard for colorectal cancer detection. Independently validated with established diagnostic criteria. No incorporation bias. |
-| Flow and timing | 🟡 some_concerns | 0 | Interval between FIT and colonoscopy varied across included studies. Some studies may have had extended intervals. However, the systematic review methodology accounts for this heterogeneity. No automatic deduction as the concern is at the "some_concerns" level. |
+**Patient selection:** 🟡 some_concerns (delta 0)
+- Meta-analysis included 19 studies with varying enrollment strategies. Most studies enrolled consecutive or screening-eligible patients, though some used case-control designs. As a meta-analysis, the pooled estimate mitigates individual study selection biases. No automatic deduction applied given the systematic review design and the majority of studies using consecutive enrollment.
+
+**Index test:** 🟢 low (delta 0)
+- FIT uses a quantitative hemoglobin cutoff value for positivity determination. Index test interpretation is objective (automated analyzer reading) and not influenced by knowledge of colonoscopy results. Low risk of verification bias.
+
+**Reference standard:** 🟢 low (delta 0)
+- Colonoscopy is the accepted gold standard for colorectal cancer detection. Independently validated with established diagnostic criteria. No incorporation bias.
+
+**Flow and timing:** 🟡 some_concerns (delta 0)
+- Interval between FIT and colonoscopy varied across included studies. Some studies may have had extended intervals. However, the systematic review methodology accounts for this heterogeneity. No automatic deduction as the concern is at the "some_concerns" level.
 
 **QUADAS-2 domain deductions sum: 0** (cap of −2 not reached)
 
@@ -127,8 +132,8 @@ Diagnostic Odds Ratio (DOR):
 
 | Check | Finding | Delta |
 |---|---|---|
-| Surrogate endpoint | No — colorectal cancer detection is a hard clinical endpoint | 0 |
-| Meta-analysis I² | Significant heterogeneity expected (I² likely >50%): sensitivity ranged from 0.70 to 0.89 depending on cutoff thresholds, and specificity varied correspondingly. No pre-specified subgroup analysis fully explains this variation. | −1 |
+| Surrogate endpoint | 🟢 No — colorectal cancer detection is a hard clinical endpoint. Classification: **hard endpoint** | 0 |
+| Meta-analysis I² | Significant heterogeneity (I² likely >50%): sensitivity ranged from 0.70 to 0.89 by cutoff threshold. No pre-specified subgroup analysis fully explains this variation. | −1 |
 
 **Net Stage 4 delta: −1** (from I² heterogeneity)
 
