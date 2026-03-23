@@ -52,6 +52,20 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - **Initial grade**: N takes precedence over phase label. Grade 5 requires ALL of: multi-center + double-blind + N > 1000.
 - **Score disclaimer**: 1–5 score is heuristic, pending expert calibration — always display disclaimer
 
+## Pilot Results
+
+5 pilot papers validated end-to-end, one per study type. All deterministic outputs (Stage 3 metrics, Stage 5 scores) confirmed reproducible across reruns after spec tightening.
+
+| Paper | Type | Score | Key Metrics |
+|---|---|---|---|
+| DAPA-HF (McMurray 2019) | RCT | 5/5 | FI=62, NNT=20.4, Power=93.9% |
+| FIT meta-analysis (Lee 2014) | Diagnostic | 4/5 | DOR=57.42 (CI: 32.25–102.24) |
+| JUPITER (Ridker 2008) | Preventive | 5/5 | FI=67, NNT=81.7, Power=85.5% |
+| Doll & Hill 1950 | Observational | 4/5 | FI=18, OR=14.04, GRADE +1 |
+| Topalian 2012 (anti-PD-1) | Phase 0/I | 2/5 | Stages 2+3 skipped, score locked 1–2 |
+
+Reports in `paper/pilot_results/`. Research note in `paper/research_note.md`.
+
 ## Tech Context
 
 - Stage 3 and Stage 5 score engine are deterministic Python (scipy, statsmodels, numpy)
