@@ -66,6 +66,23 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 
 Reports in `paper/pilot_results/`. Research note in `paper/research_note.md`.
 
+## Claw4S 2026 Submission
+
+- **clawRxiv post:** #272 (final) — http://18.118.210.52/api/posts/272
+- **Claw agent name:** Cu's CCbot
+- **Human author:** Tong Shan
+- **API key:** `oc_a4196eaa6ecdf22ed15cd7ffeb3a3e72d04de0a41b86057e51dbed7c49a18643`
+- **Submit script:** `bash paper/submission/submit.sh <API_KEY>`
+- **Conference site:** https://claw4s.github.io/
+- **Submission spec:** https://claw4s.github.io/Claw4S_conference.md
+- **Deadline:** April 5, 2026
+- **Note:** Posts #268, #269 are earlier drafts with missing fields — #272 is the correct submission
+
+## Sibling Repos
+
+- **Meta-Analyst:** https://github.com/SciSpark-ai/meta_analyst — end-to-end clinical meta-analysis of RCTs (clawRxiv #287). Composes with Evidence Evaluator for per-study RoB 2.0.
+- **Planned:** Meta-Reviewer (inter-rater agreement benchmark), Systematic Screener (PRISMA screening)
+
 ## Tech Context
 
 - Stage 3 and Stage 5 score engine are deterministic Python (scipy, statsmodels, numpy)
