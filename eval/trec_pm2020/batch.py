@@ -111,6 +111,15 @@ def run_batch(
                 result: RunResult = fut.result()
             except Exception as e:
                 result = RunResult(pmid=pmid, status="error", error_msg=str(e))
+            # Pull SDK metadata out of the per-paper data (set by runner.run_one).
+            jd = result.json_data or {}
+            sdk_meta = jd.get("sdk_meta") or {}
+            usage = sdk_meta.get("usage") or {}
+            cache_read = usage.get("cache_read_input_tokens", 0) or 0
+            cache_creation = usage.get("cache_creation_input_tokens", 0) or 0
+            total_cost = sdk_meta.get("total_cost_usd")
+            num_turns = sdk_meta.get("num_turns")
+
             if result.status == "ok" or result.status.startswith("partial_"):
                 cp.completed.append(result.pmid)
                 consecutive_errors = 0
@@ -119,6 +128,11 @@ def run_batch(
                     "runtime_s": result.runtime_s,
                     "input_tokens": result.input_tokens,
                     "output_tokens": result.output_tokens,
+                    "cache_read_input_tokens": cache_read,
+                    "cache_creation_input_tokens": cache_creation,
+                    "total_cost_usd": total_cost,
+                    "num_turns": num_turns,
+                    "sdk_meta": sdk_meta,
                 })
             else:
                 cp.failed.append({
@@ -134,8 +148,6 @@ def run_batch(
                 })
             write_checkpoint(cp_path, cp)
             n_done = len(cp.completed) + len(cp.failed)
-            # Pull score + study type out of result.json_data for the progress row
-            jd = result.json_data or {}
             score = (jd.get("stage5") or {}).get("suggested_score")
             study_type = (jd.get("stage0") or {}).get("study_type")
             append_progress_tsv(progress_path, {
@@ -145,7 +157,12 @@ def run_batch(
                 "score": "" if score is None else score,
                 "study_type": study_type or "",
                 "runtime_s": f"{result.runtime_s:.1f}",
+                "num_turns": num_turns if num_turns is not None else "",
+                "input_tokens": result.input_tokens,
                 "output_tokens": result.output_tokens,
+                "cache_read_tokens": cache_read,
+                "cache_creation_tokens": cache_creation,
+                "total_cost_usd": f"{total_cost:.4f}" if total_cost is not None else "",
                 "completed": len(cp.completed),
                 "failed": len(cp.failed),
                 "total": len(all_pmids),

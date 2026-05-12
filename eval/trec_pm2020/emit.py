@@ -50,7 +50,11 @@ def append_log(log_path: str, entry: Dict[str, Any]) -> None:
 
 PROGRESS_TSV_HEADER = [
     "timestamp", "pmid", "status", "score", "study_type",
-    "runtime_s", "output_tokens", "completed", "failed", "total",
+    "runtime_s", "num_turns",
+    "input_tokens", "output_tokens",
+    "cache_read_tokens", "cache_creation_tokens",
+    "total_cost_usd",
+    "completed", "failed", "total",
 ]
 
 
@@ -59,12 +63,29 @@ def append_progress_tsv(path: str, fields: Dict[str, Any]) -> None:
 
     Creates the file with a header row on first write. `fields` should contain
     the keys in PROGRESS_TSV_HEADER; missing keys are written as empty cells.
+
+    If the file exists but its header doesn't match the current
+    `PROGRESS_TSV_HEADER` (e.g. schema evolved between runs), the existing file
+    is rotated to `<path>.v<N>` and a fresh one is started. This keeps the live
+    file column-aligned and preserves prior data for inspection.
     """
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    expected = "\t".join(PROGRESS_TSV_HEADER)
+
+    if os.path.exists(path):
+        with open(path) as f:
+            existing_header = f.readline().rstrip("\n")
+        if existing_header != expected:
+            # Rotate aside; find next available .v<N> suffix.
+            n = 1
+            while os.path.exists(f"{path}.v{n}"):
+                n += 1
+            os.rename(path, f"{path}.v{n}")
+
     write_header = not os.path.exists(path)
     with open(path, "a") as f:
         if write_header:
-            f.write("\t".join(PROGRESS_TSV_HEADER) + "\n")
+            f.write(expected + "\n")
         row = [str(fields.get(k, "")) for k in PROGRESS_TSV_HEADER]
         f.write("\t".join(row) + "\n")
 
