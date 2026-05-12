@@ -32,6 +32,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     cp = batch_mod.run_batch(
         sample_csv=sample_csv, results_dir=results_dir, cache_dir=cache_dir,
         run_id=run_id, workers=args.workers, resume=args.resume,
+        retry_failed=args.retry_failed,
         limit=args.limit, model=args.model, max_turns=args.max_turns,
         cwd=REPO_ROOT,
     )
@@ -87,6 +88,8 @@ def main(argv=None) -> int:
                        help="Cap number of PMIDs (for smoke tests)")
     p_run.add_argument("--resume", action="store_true", default=True)
     p_run.add_argument("--no-resume", dest="resume", action="store_false")
+    p_run.add_argument("--retry-failed", action="store_true", default=False,
+                       help="Re-attempt PMIDs in checkpoint.failed (e.g. after a rate-limit-induced batch of errors).")
     p_run.add_argument("--model", type=str, default="claude-opus-4-7")
     p_run.add_argument("--max-turns", type=int, default=60)
     p_run.set_defaults(func=cmd_run)

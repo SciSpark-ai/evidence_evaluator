@@ -45,6 +45,27 @@ def append_log(log_path: str, entry: Dict[str, Any]) -> None:
         f.write(json.dumps(entry) + "\n")
 
 
+PROGRESS_TSV_HEADER = [
+    "timestamp", "pmid", "status", "score", "study_type",
+    "runtime_s", "output_tokens", "completed", "failed", "total",
+]
+
+
+def append_progress_tsv(path: str, fields: Dict[str, Any]) -> None:
+    """Append one paper's progress to a tail-friendly TSV.
+
+    Creates the file with a header row on first write. `fields` should contain
+    the keys in PROGRESS_TSV_HEADER; missing keys are written as empty cells.
+    """
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    write_header = not os.path.exists(path)
+    with open(path, "a") as f:
+        if write_header:
+            f.write("\t".join(PROGRESS_TSV_HEADER) + "\n")
+        row = [str(fields.get(k, "")) for k in PROGRESS_TSV_HEADER]
+        f.write("\t".join(row) + "\n")
+
+
 def read_checkpoint(path: str) -> Checkpoint:
     """Read the checkpoint file; return an empty Checkpoint if missing."""
     if not os.path.exists(path):

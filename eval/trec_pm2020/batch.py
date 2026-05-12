@@ -10,10 +10,12 @@ The runner is injected so tests can substitute a fake without touching the LLM.
 import csv
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
 from typing import Callable, List, Optional
 
 from eval.trec_pm2020.emit import (
     Checkpoint, read_checkpoint, write_checkpoint, append_log,
+    append_progress_tsv,
 )
 from eval.trec_pm2020.runner import RunResult, run_one
 
@@ -35,12 +37,17 @@ def run_batch(
     workers: int = 2,
     runner: Optional[RunnerFn] = None,
     resume: bool = True,
+    retry_failed: bool = False,
     limit: Optional[int] = None,
     model: str = "claude-opus-4-7",
     max_turns: int = 60,
     cwd: Optional[str] = None,
 ) -> Checkpoint:
-    """Run the batch. Returns the final checkpoint."""
+    """Run the batch. Returns the final checkpoint.
+
+    With `retry_failed=True`, PMIDs previously in `cp.failed` are re-attempted
+    and their prior failure entries are cleared from the checkpoint before retry.
+    """
     runner = runner or run_one
 
     os.makedirs(results_dir, exist_ok=True)
@@ -48,6 +55,7 @@ def run_batch(
     json_dir = os.path.join(results_dir, "json")
     log_path = os.path.join(results_dir, "run_log.jsonl")
     cp_path = os.path.join(results_dir, "checkpoint.json")
+    progress_path = os.path.join(results_dir, "progress.tsv")
     os.makedirs(reports_dir, exist_ok=True)
     os.makedirs(json_dir, exist_ok=True)
 
@@ -60,7 +68,12 @@ def run_batch(
 
     all_pmids = _load_sample_pmids(sample_csv)
     completed_set = set(cp.completed)
-    failed_pmid_set = {f["pmid"] for f in cp.failed}
+    if retry_failed:
+        # Clear previously-failed entries so they get re-attempted in this run.
+        cp.failed = []
+        failed_pmid_set: set[str] = set()
+    else:
+        failed_pmid_set = {f["pmid"] for f in cp.failed}
     todo = [p for p in all_pmids if p not in completed_set and p not in failed_pmid_set]
     if limit is not None:
         todo = todo[:limit]
@@ -104,6 +117,22 @@ def run_batch(
                 })
             write_checkpoint(cp_path, cp)
             n_done = len(cp.completed) + len(cp.failed)
+            # Pull score + study type out of result.json_data for the progress row
+            jd = result.json_data or {}
+            score = (jd.get("stage5") or {}).get("suggested_score")
+            study_type = (jd.get("stage0") or {}).get("study_type")
+            append_progress_tsv(progress_path, {
+                "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "pmid": pmid,
+                "status": result.status,
+                "score": "" if score is None else score,
+                "study_type": study_type or "",
+                "runtime_s": f"{result.runtime_s:.1f}",
+                "output_tokens": result.output_tokens,
+                "completed": len(cp.completed),
+                "failed": len(cp.failed),
+                "total": len(all_pmids),
+            })
             print(f"  [{n_done}/{len(all_pmids)}] {pmid} → {result.status} ({result.runtime_s:.1f}s)")
 
     return cp
