@@ -74,3 +74,79 @@ def write_checkpoint(path: str, cp: Checkpoint) -> None:
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
         raise
+
+
+def build_master_csv(
+    qrels_path: str,
+    sample_csv_path: str,
+    json_dir: str,
+    out_path: str,
+) -> int:
+    """Join per-paper JSON dumps with the qrels file → master.csv.
+
+    For each (topic, pmid, grade) row in qrels where pmid is in the sampled set,
+    emit one row to master.csv with both TREC fields and Evidence Evaluator fields.
+
+    Returns the number of rows written (excluding header).
+    """
+    import csv as _csv
+    from eval.trec_pm2020.qrels import parse_qrels
+
+    # Build {pmid: max_grade} from the sample CSV
+    sample_max: Dict[str, int] = {}
+    with open(sample_csv_path) as f:
+        reader = _csv.DictReader(f)
+        for row in reader:
+            sample_max[row["pmid"]] = int(row["max_grade"])
+
+    columns = [
+        "topic_id", "pmid", "trec_grade", "max_grade",
+        "ee_score", "ee_study_type", "ee_overall_concern",
+        "ee_fragility_index", "ee_post_hoc_power", "ee_dor",
+        "report_path", "json_path", "run_status", "runtime_s",
+    ]
+
+    written = 0
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", newline="") as f_out:
+        w = _csv.DictWriter(f_out, fieldnames=columns)
+        w.writeheader()
+        for r in parse_qrels(qrels_path):
+            if r.pmid not in sample_max:
+                continue
+            json_path = os.path.join(json_dir, f"{r.pmid}.json")
+            data: Dict[str, Any] = {}
+            if os.path.exists(json_path):
+                with open(json_path) as f:
+                    data = json.load(f)
+            row = {
+                "topic_id": r.topic,
+                "pmid": r.pmid,
+                "trec_grade": r.grade,
+                "max_grade": sample_max[r.pmid],
+                "ee_score": _get(data, "stage5", "suggested_score"),
+                "ee_study_type": _get(data, "stage0", "study_type"),
+                "ee_overall_concern": _get(data, "stage4", "overall_concern"),
+                "ee_fragility_index": _get(data, "stage3", "fragility_index"),
+                "ee_post_hoc_power": _get(data, "stage3", "post_hoc_power"),
+                "ee_dor": _get(data, "stage3", "dor"),
+                "report_path": data.get("report_path", ""),
+                "json_path": os.path.relpath(json_path, os.path.dirname(out_path)),
+                "run_status": data.get("status", "missing"),
+                "runtime_s": data.get("runtime_s", ""),
+            }
+            # Normalize None → "" for CSV
+            for k, v in list(row.items()):
+                if v is None:
+                    row[k] = ""
+            w.writerow(row)
+            written += 1
+    return written
+
+
+def _get(data: Dict[str, Any], section: str, key: str) -> Any:
+    """Safe nested lookup that tolerates missing sections."""
+    sect = data.get(section)
+    if not isinstance(sect, dict):
+        return None
+    return sect.get(key)

@@ -111,10 +111,67 @@ def test_checkpoint_atomic_replace():
         shutil.rmtree(tmpdir)
 
 
+def test_build_master_csv_basic():
+    """Synthetic test: 2 sampled PMIDs, one appears under 2 topics."""
+    tmpdir = tempfile.mkdtemp()
+    try:
+        json_dir = os.path.join(tmpdir, "json")
+        os.makedirs(json_dir)
+
+        # PMID A: topic 1 grade 8, topic 2 grade 4 — sampled, max_grade=8
+        # PMID B: topic 3 grade 2 — sampled, max_grade=2
+        # PMID C: topic 4 grade 1 — NOT sampled
+        write_json(json_dir, "A", {
+            "pmid": "A", "status": "ok",
+            "stage0": {"study_type": "RCT_intervention"},
+            "stage3": {"fragility_index": 62, "post_hoc_power": 0.94, "dor": None},
+            "stage4": {"overall_concern": "low"},
+            "stage5": {"suggested_score": 5},
+            "runtime_s": 142, "report_path": "reports/evidence_report_A.md",
+        })
+        write_json(json_dir, "B", {
+            "pmid": "B", "status": "partial_insufficient_data",
+            "stage0": {"study_type": "observational"},
+            "stage3": {"fragility_index": 18, "post_hoc_power": None, "dor": None},
+            "stage4": {"overall_concern": "some_concerns"},
+            "stage5": {"suggested_score": 3},
+            "runtime_s": 95, "report_path": "reports/evidence_report_B.md",
+        })
+
+        qrels_path = os.path.join(tmpdir, "qrels.txt")
+        with open(qrels_path, "w") as f:
+            f.write("1 0 A 8\n2 0 A 4\n3 0 B 2\n4 0 C 1\n")
+
+        sample_csv = os.path.join(tmpdir, "sample.csv")
+        with open(sample_csv, "w") as f:
+            f.write("pmid,max_grade,all_topic_grades\n")
+            f.write("A,8,1:8,2:4\n")
+            f.write("B,2,3:2\n")
+
+        master_path = os.path.join(tmpdir, "master.csv")
+        from eval.trec_pm2020.emit import build_master_csv
+        build_master_csv(qrels_path, sample_csv, json_dir, master_path)
+
+        import csv
+        with open(master_path) as f:
+            rows = list(csv.DictReader(f))
+        check("row count", len(rows), 3)  # A x 2 topics + B x 1 topic
+        a_rows = [r for r in rows if r["pmid"] == "A"]
+        check("A appears twice", len(a_rows), 2)
+        check("A ee_score", a_rows[0]["ee_score"], "5")
+        check("A study type", a_rows[0]["ee_study_type"], "RCT_intervention")
+        b_row = next(r for r in rows if r["pmid"] == "B")
+        check("B power is empty", b_row["ee_post_hoc_power"], "")
+        check("B status", b_row["run_status"], "partial_insufficient_data")
+    finally:
+        shutil.rmtree(tmpdir)
+
+
 if __name__ == "__main__":
     for fn in [test_write_report_creates_file, test_write_json_pretty,
                test_append_log_appends, test_checkpoint_roundtrip,
-               test_checkpoint_missing_returns_empty, test_checkpoint_atomic_replace]:
+               test_checkpoint_missing_returns_empty, test_checkpoint_atomic_replace,
+               test_build_master_csv_basic]:
         print(f"\n{fn.__name__}")
         fn()
     print(f"\n{'='*50}\nPASS: {PASS}  FAIL: {FAIL}")
