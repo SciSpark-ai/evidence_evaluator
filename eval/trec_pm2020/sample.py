@@ -52,7 +52,8 @@ def stratified_sample(
 ) -> List[SampleRow]:
     """Sample `per_bucket` PMIDs from each max-grade bucket in BUCKETS.
 
-    Raises ValueError if any bucket has fewer than `per_bucket` PMIDs.
+    Raises ValueError if any *non-empty* bucket has fewer than `per_bucket` PMIDs.
+    Empty buckets are silently skipped (the dataset simply has no PMIDs at that grade).
     Returns a list in bucket order: all grade-8 first, then grade-4, then grade-2, then grade-1.
     """
     rng = random.Random(seed)
