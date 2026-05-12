@@ -73,15 +73,10 @@ def run_batch(
 
     def _work(pmid: str) -> RunResult:
         append_log(log_path, {"pmid": pmid, "event": "started", "run_id": run_id})
-        try:
-            return runner(
-                pmid=pmid, reports_dir=reports_dir, json_dir=json_dir,
-                cache_dir=cache_dir, model=model, max_turns=max_turns, cwd=cwd,
-            )
-        except TypeError:
-            # Fake runners in tests may not accept all kwargs
-            return runner(pmid=pmid, reports_dir=reports_dir, json_dir=json_dir,
-                          cache_dir=cache_dir)
+        return runner(
+            pmid=pmid, reports_dir=reports_dir, json_dir=json_dir,
+            cache_dir=cache_dir, model=model, max_turns=max_turns, cwd=cwd,
+        )
 
     with ThreadPoolExecutor(max_workers=workers) as ex:
         futures = {ex.submit(_work, p): p for p in todo}
