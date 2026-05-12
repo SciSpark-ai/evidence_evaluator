@@ -126,7 +126,10 @@ def run_one(
     data["runtime_s"] = round(time.monotonic() - t0, 2)
     data["input_tokens"] = usage.get("input_tokens", 0)
     data["output_tokens"] = usage.get("output_tokens", 0)
-    data["report_path"] = f"reports/evidence_report_{pmid}.md"
+    data["report_path"] = os.path.join(
+        os.path.basename(reports_dir.rstrip(os.sep)),
+        f"evidence_report_{pmid}.md",
+    )
 
     # Persist JSON via emit (re-import to avoid circular issues if any)
     from eval.trec_pm2020.emit import write_json
@@ -180,24 +183,20 @@ def _run_agent(
                     text = getattr(block, "text", None)
                     if text:
                         transcript_parts.append(text)
-                # Usage may be on individual AssistantMessage
-                u = msg.usage or {}
-                if isinstance(u, dict):
-                    in_toks += u.get("input_tokens", 0) or 0
-                    out_toks += u.get("output_tokens", 0) or 0
-                else:
-                    in_toks += getattr(u, "input_tokens", 0) or 0
-                    out_toks += getattr(u, "output_tokens", 0) or 0
+                # Do NOT accumulate usage from AssistantMessage — ResultMessage
+                # carries the canonical aggregate for the full turn and would
+                # cause double-counting if both sources were summed.
 
             elif isinstance(msg, ResultMessage):
-                # ResultMessage carries aggregate usage and stop_reason
+                # ResultMessage carries aggregate usage and stop_reason.
+                # Set (replace) totals here — this is the single source of truth.
                 u = msg.usage or {}
                 if isinstance(u, dict):
-                    in_toks += u.get("input_tokens", 0) or 0
-                    out_toks += u.get("output_tokens", 0) or 0
+                    in_toks = u.get("input_tokens", 0) or 0
+                    out_toks = u.get("output_tokens", 0) or 0
                 else:
-                    in_toks += getattr(u, "input_tokens", 0) or 0
-                    out_toks += getattr(u, "output_tokens", 0) or 0
+                    in_toks = getattr(u, "input_tokens", 0) or 0
+                    out_toks = getattr(u, "output_tokens", 0) or 0
 
                 sr = getattr(msg, "stop_reason", None)
                 if sr == "max_turns":
