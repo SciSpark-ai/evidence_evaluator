@@ -34,6 +34,7 @@ python tests/eval/test_sample.py                 # eval harness: stratified samp
 python tests/eval/test_pubmed.py                 # eval harness: PubMed efetch + cache (7/7 pass)
 python tests/eval/test_emit.py                   # eval harness: emit writers + build_master_csv (24/24 pass)
 python tests/eval/test_runner.py                 # eval harness: prompt builder + JSON extractor (9/9 pass)
+python tests/eval/test_batch.py                  # eval harness: parallel orchestrator + checkpoint/resume (8/8 pass)
 ```
 
 Tests use a custom pass/fail counter (not pytest). They print results to stdout.
@@ -50,6 +51,7 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - `eval/trec_pm2020/emit.py` — Output writers for the batch harness. Exports `write_report()`, `write_json()`, `append_log()`, `read_checkpoint()`, `write_checkpoint()`, `Checkpoint`, and `build_master_csv()`. `build_master_csv(qrels_path, sample_csv, json_dir, out_path)` joins per-paper JSON dumps with the qrels file to produce a flat master.csv (one row per topic×pmid pair, TREC fields + EE fields).
 - `eval/trec_pm2020/PROMPT_TEMPLATE.md` — Agent prompt template for one-PMID runs. Uses Python `.format()` placeholders `{pmid}`, `{reports_dir}`, `{json_dir}`; JSON schema example uses `{{`/`}}` escapes. Instructs the agent to read `SKILL.md`, work abstract-only (no full-text fetch), run Stages 0→5, save the Markdown report, then emit a single fenced `\`\`\`json` block.
 - `eval/trec_pm2020/runner.py` — Single-PMID SDK driver. Exports `RunResult` (dataclass), `build_prompt(pmid, reports_dir, json_dir)`, `extract_final_json(transcript)`, `run_one(pmid, ...)`. SDK call isolated in `_run_agent()` (uses `claude_agent_sdk.query()` — one-shot batch API). Status strings: `ok`, `partial_insufficient_data`, `partial_off_distribution`, `max_turns`, `fetch_error`, `invalid_pmid`, `error`.
+- `eval/trec_pm2020/batch.py` — Parallel orchestrator. Exports `run_batch(sample_csv, results_dir, cache_dir, run_id, workers=2, runner=None, resume=True, limit=None, ...)`. Reads `sample_500.csv`, skips PMIDs already in `checkpoint.completed` (when `resume=True`), runs remainder via `ThreadPoolExecutor`, updates `checkpoint.json` atomically after each completion. Runner is injected for testability.
 - `tests/` — Dev-only validation tests (not part of installed skill).
 - `paper/` — Claw4S 2026 conference submission (research note, pilot results, submission script).
 
