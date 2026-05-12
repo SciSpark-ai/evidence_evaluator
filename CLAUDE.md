@@ -94,8 +94,14 @@ tiers externally.
 
 - **Run a smoke test (5 papers):** `tmux new -s trec_smoke "python3 -m eval.trec_pm2020 run --limit 5 --workers 1 --run-id smoke"`
 - **Run the full 500:** `tmux new -s trec_run "python3 -m eval.trec_pm2020 run --workers 2"`
+- **Resume after a rate-limit-induced halt (retry the failed ones too):** `python3 -m eval.trec_pm2020 run --workers 2 --run-id <existing_run_id> --retry-failed`
+- **Watch progress live:** `tail -f results/trec_pm2020/<run_id>/progress.tsv`
 - **Build master CSV after:** `python3 -m eval.trec_pm2020 build-csv results/trec_pm2020/<run_id>`
 - **Validate completion:** `python3 -m eval.trec_pm2020 validate results/trec_pm2020/<run_id>`
+
+Each run writes four artifacts to `results/trec_pm2020/<run_id>/`: `reports/*.md`, `json/*.json`,
+`run_log.jsonl` (per-event JSONL), `progress.tsv` (tail-friendly TSV — one row per paper),
+and `checkpoint.json` (atomic, drives `--resume`).
 
 Auth: harness uses `ANTHROPIC_API_KEY` if set, else falls back to OAuth from `claude` CLI
 (subscription billing). The 500-paper run is designed to fit within Max-tier subscription
