@@ -105,6 +105,11 @@ input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens, total_cos
 completed, failed, total`. Per-paper JSON dumps include `sdk_meta` (full SDK
 telemetry: usage breakdown, total_cost_usd, model_usage, api_error_status, etc.).
 
+`master.csv` includes an `ee_model` column so the human reviewer can filter by which
+model produced each paper. For run_id=`smoke`: the first 35 papers were generated on
+Opus 4.7; the remaining 465 are on Sonnet 4.6 (subscription cap on Opus exhausted faster
+than feasible for the full 500 in this session window).
+
 Each run writes four artifacts to `results/trec_pm2020/<run_id>/`: `reports/*.md`, `json/*.json`,
 `run_log.jsonl` (per-event JSONL), `progress.tsv` (tail-friendly TSV — one row per paper),
 and `checkpoint.json` (atomic, drives `--resume`).

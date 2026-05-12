@@ -150,6 +150,7 @@ def build_master_csv(
         "topic_id", "pmid", "trec_grade", "max_grade",
         "ee_score", "ee_study_type", "ee_overall_concern",
         "ee_fragility_index", "ee_post_hoc_power", "ee_dor",
+        "ee_model", "ee_total_cost_usd",
         "report_path", "json_path", "run_status", "runtime_s",
     ]
 
@@ -177,6 +178,8 @@ def build_master_csv(
                 "ee_fragility_index": _get(data, "stage3", "fragility_index"),
                 "ee_post_hoc_power": _get(data, "stage3", "post_hoc_power"),
                 "ee_dor": _get(data, "stage3", "dor"),
+                "ee_model": data.get("model", ""),
+                "ee_total_cost_usd": data.get("total_cost_usd", ""),
                 "report_path": data.get("report_path", ""),
                 "json_path": os.path.relpath(json_path, os.path.dirname(out_path)),
                 "run_status": data.get("status", "missing"),
