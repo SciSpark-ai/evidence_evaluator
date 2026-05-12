@@ -29,6 +29,8 @@ pip install scipy statsmodels numpy
 
 python tests/test_stage3_math.py                 # 147/147 pass
 python tests/test_stage5_report.py               # 70/70 pass
+python tests/eval/test_qrels.py                  # eval harness: qrels parser
+python tests/eval/test_sample.py                 # eval harness: stratified sampler (8/8 pass)
 ```
 
 Tests use a custom pass/fail counter (not pytest). They print results to stdout.
@@ -39,6 +41,8 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - `skills/evidence-evaluator/pipeline/stage3_math.py` — Deterministic math audit. Exports `run_stage3()`, `compute_fragility_index`, `compute_nnt`, `compute_dor`, etc. Routes by study type.
 - `skills/evidence-evaluator/pipeline/stage5_report.py` — Score rule engine + report assembly. Exports `compute_suggested_score()`, `assemble_report()`, `deduplicate_stage4_deltas()`.
 - `skills/evidence-evaluator/references/` — Stage specs the agent reads before executing each stage.
+- `eval/trec_pm2020/qrels.py` — Parses `qrels-expgains-phase2.txt`. Exports `parse_qrels()`, `QrelRow`.
+- `eval/trec_pm2020/sample.py` — Stratified 500-PMID sampler. Exports `compute_max_grades()`, `stratified_sample()`, `SampleRow`, `write_sample_csv()`. Groups unique PMIDs by max-grade across topics, then `random.Random(seed=42).sample(bucket, 125)` per bucket {8, 4, 2, 1}.
 - `tests/` — Dev-only validation tests (not part of installed skill).
 - `paper/` — Claw4S 2026 conference submission (research note, pilot results, submission script).
 
