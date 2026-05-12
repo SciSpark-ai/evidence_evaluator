@@ -92,12 +92,18 @@ with Tier 1 (abstract-only) input. Outputs land in `results/trec_pm2020/<run_id>
 (gitignored). A colleague performs the human comparison against TREC Phase 2 evidence
 tiers externally.
 
-- **Run a smoke test (5 papers):** `tmux new -s trec_smoke "python3 -m eval.trec_pm2020 run --limit 5 --workers 1 --run-id smoke"`
-- **Run the full 500:** `tmux new -s trec_run "python3 -m eval.trec_pm2020 run --workers 2"`
-- **Resume after a rate-limit-induced halt (retry the failed ones too):** `python3 -m eval.trec_pm2020 run --workers 2 --run-id <existing_run_id> --retry-failed`
+- **Run a smoke test (5 papers):** `nohup python3 -m eval.trec_pm2020 run --limit 5 --workers 1 --run-id smoke > /tmp/trec_smoke.log 2>&1 & disown`
+- **Unattended loop run (recommended for full sample on subscription):** `nohup python3 -m eval.trec_pm2020 run --workers 1 --loop --run-id <id> --stop-after-consecutive-errors 3 > /tmp/trec_loop.log 2>&1 & disown`
+  - Circuit breaker trips after 3 back-to-back error results (typical rate-limit signature), then sleeps until 5h + buffer after the first failure, then auto-retries failed PMIDs and continues. Survives subscription cooldowns unattended.
+- **One-off resume after a manual halt (retry the failed ones too):** `python3 -m eval.trec_pm2020 run --workers 1 --run-id <existing_run_id> --retry-failed`
 - **Watch progress live:** `tail -f results/trec_pm2020/<run_id>/progress.tsv`
 - **Build master CSV after:** `python3 -m eval.trec_pm2020 build-csv results/trec_pm2020/<run_id>`
 - **Validate completion:** `python3 -m eval.trec_pm2020 validate results/trec_pm2020/<run_id>`
+
+`progress.tsv` columns (15): `timestamp, pmid, status, score, study_type, runtime_s, num_turns,
+input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens, total_cost_usd,
+completed, failed, total`. Per-paper JSON dumps include `sdk_meta` (full SDK
+telemetry: usage breakdown, total_cost_usd, model_usage, api_error_status, etc.).
 
 Each run writes four artifacts to `results/trec_pm2020/<run_id>/`: `reports/*.md`, `json/*.json`,
 `run_log.jsonl` (per-event JSONL), `progress.tsv` (tail-friendly TSV — one row per paper),
