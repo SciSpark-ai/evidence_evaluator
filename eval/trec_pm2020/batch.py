@@ -9,8 +9,9 @@ The runner is injected so tests can substitute a fake without touching the LLM.
 
 import csv
 import os
+import time as _time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Callable, List, Optional
 
 from eval.trec_pm2020.emit import (
@@ -42,11 +43,18 @@ def run_batch(
     model: str = "claude-opus-4-7",
     max_turns: int = 60,
     cwd: Optional[str] = None,
+    stop_after_consecutive_errors: Optional[int] = None,
 ) -> Checkpoint:
     """Run the batch. Returns the final checkpoint.
 
     With `retry_failed=True`, PMIDs previously in `cp.failed` are re-attempted
     and their prior failure entries are cleared from the checkpoint before retry.
+
+    With `stop_after_consecutive_errors=N`, halts the batch after N back-to-back
+    error results (typical rate-limit signature). Sets `cp.last_stop_reason` to
+    "circuit_breaker" and `cp.first_error_at_iso` to the UTC ISO timestamp of
+    the first error in the failing cluster. Remaining futures are cancelled
+    where possible; any that complete after the break are still recorded.
     """
     runner = runner or run_one
 
@@ -91,6 +99,10 @@ def run_batch(
             cache_dir=cache_dir, model=model, max_turns=max_turns, cwd=cwd,
         )
 
+    consecutive_errors = 0
+    first_error_at: Optional[datetime] = None
+    stop_reason = "completed"
+
     with ThreadPoolExecutor(max_workers=workers) as ex:
         futures = {ex.submit(_work, p): p for p in todo}
         for fut in as_completed(futures):
@@ -101,6 +113,7 @@ def run_batch(
                 result = RunResult(pmid=pmid, status="error", error_msg=str(e))
             if result.status == "ok" or result.status.startswith("partial_"):
                 cp.completed.append(result.pmid)
+                consecutive_errors = 0
                 append_log(log_path, {
                     "pmid": pmid, "event": "completed", "status": result.status,
                     "runtime_s": result.runtime_s,
@@ -111,6 +124,10 @@ def run_batch(
                 cp.failed.append({
                     "pmid": pmid, "reason": result.status, "error_msg": result.error_msg,
                 })
+                if result.status == "error":
+                    if first_error_at is None:
+                        first_error_at = datetime.now(timezone.utc)
+                    consecutive_errors += 1
                 append_log(log_path, {
                     "pmid": pmid, "event": "failed", "status": result.status,
                     "error_msg": result.error_msg,
@@ -135,4 +152,86 @@ def run_batch(
             })
             print(f"  [{n_done}/{len(all_pmids)}] {pmid} → {result.status} ({result.runtime_s:.1f}s)")
 
+            # Circuit breaker: bail out if a sustained cluster of errors hits.
+            if (stop_after_consecutive_errors is not None
+                    and consecutive_errors >= stop_after_consecutive_errors):
+                stop_reason = "circuit_breaker"
+                print(f"\n  [circuit breaker] {consecutive_errors} consecutive errors — halting batch.")
+                for f in futures:
+                    if not f.done():
+                        f.cancel()
+                break
+
+    cp.last_stop_reason = stop_reason
+    cp.first_error_at_iso = first_error_at.isoformat() if first_error_at else ""
+    write_checkpoint(cp_path, cp)
     return cp
+
+
+def run_loop(
+    sample_csv: str,
+    results_dir: str,
+    cache_dir: str,
+    run_id: str,
+    workers: int = 1,
+    stop_after_consecutive_errors: int = 3,
+    cooldown_buffer_minutes: int = 5,
+    model: str = "claude-opus-4-7",
+    max_turns: int = 60,
+    cwd: Optional[str] = None,
+    max_iterations: Optional[int] = None,
+) -> Checkpoint:
+    """Run batches in a loop with auto-resume after rate-limit cooldowns.
+
+    Strategy: call run_batch with retry_failed=True and the given circuit-breaker
+    threshold. On "circuit_breaker" stop, sleep until 5h + buffer after the first
+    failing call (which clears the rolling subscription cap), then re-enter the loop.
+    Exits when run_batch returns "completed" or `max_iterations` is reached.
+    """
+    cp_path = os.path.join(results_dir, "checkpoint.json")
+    iteration = 0
+    while True:
+        iteration += 1
+        if max_iterations is not None and iteration > max_iterations:
+            print(f"\n[loop] reached max_iterations={max_iterations}; exiting.")
+            return read_checkpoint(cp_path)
+
+        ts = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        print(f"\n========================================================")
+        print(f"[loop] iteration {iteration} starting at {ts}")
+        print(f"========================================================")
+        cp = run_batch(
+            sample_csv=sample_csv, results_dir=results_dir, cache_dir=cache_dir,
+            run_id=run_id, workers=workers,
+            resume=True, retry_failed=True,
+            limit=None, model=model, max_turns=max_turns, cwd=cwd,
+            stop_after_consecutive_errors=stop_after_consecutive_errors,
+        )
+        print(f"\n[loop] iteration {iteration} stop_reason={cp.last_stop_reason} "
+              f"completed={len(cp.completed)} failed={len(cp.failed)}")
+
+        if cp.last_stop_reason == "completed":
+            if cp.failed:
+                print(f"[loop] batch ended without circuit-breaker but {len(cp.failed)} "
+                      f"PMIDs remain in failed — exiting (unrecoverable).")
+            else:
+                print(f"[loop] all papers complete — exiting.")
+            return cp
+
+        if cp.last_stop_reason != "circuit_breaker":
+            print(f"[loop] unexpected stop_reason={cp.last_stop_reason!r}; exiting.")
+            return cp
+
+        if not cp.first_error_at_iso:
+            print(f"[loop] circuit_breaker but no first_error_at recorded; exiting.")
+            return cp
+        first_err = datetime.fromisoformat(cp.first_error_at_iso)
+        wake_at = first_err + timedelta(hours=5, minutes=cooldown_buffer_minutes)
+        now = datetime.now(timezone.utc)
+        sleep_s = (wake_at - now).total_seconds()
+        if sleep_s > 0:
+            print(f"[loop] sleeping {sleep_s/3600:.2f}h until {wake_at.isoformat()} "
+                  f"(5h after first error + {cooldown_buffer_minutes}min buffer)")
+            _time.sleep(sleep_s)
+        else:
+            print(f"[loop] cooldown already elapsed; resuming immediately.")

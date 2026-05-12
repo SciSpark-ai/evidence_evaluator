@@ -29,13 +29,24 @@ def cmd_run(args: argparse.Namespace) -> int:
     results_dir = args.results_dir or os.path.join(REPO_ROOT, "results/trec_pm2020", run_id)
     cache_dir = args.cache_dir or os.path.join(REPO_ROOT, "data/trec_pm2020/abstracts_cache")
 
-    cp = batch_mod.run_batch(
-        sample_csv=sample_csv, results_dir=results_dir, cache_dir=cache_dir,
-        run_id=run_id, workers=args.workers, resume=args.resume,
-        retry_failed=args.retry_failed,
-        limit=args.limit, model=args.model, max_turns=args.max_turns,
-        cwd=REPO_ROOT,
-    )
+    if args.loop:
+        cp = batch_mod.run_loop(
+            sample_csv=sample_csv, results_dir=results_dir, cache_dir=cache_dir,
+            run_id=run_id, workers=args.workers,
+            stop_after_consecutive_errors=args.stop_after_consecutive_errors,
+            cooldown_buffer_minutes=args.cooldown_buffer_minutes,
+            model=args.model, max_turns=args.max_turns, cwd=REPO_ROOT,
+            max_iterations=args.max_iterations,
+        )
+    else:
+        cp = batch_mod.run_batch(
+            sample_csv=sample_csv, results_dir=results_dir, cache_dir=cache_dir,
+            run_id=run_id, workers=args.workers, resume=args.resume,
+            retry_failed=args.retry_failed,
+            limit=args.limit, model=args.model, max_turns=args.max_turns,
+            cwd=REPO_ROOT,
+            stop_after_consecutive_errors=args.stop_after_consecutive_errors,
+        )
     print(f"\nRun complete. Completed: {len(cp.completed)}, Failed: {len(cp.failed)}")
     return 0 if not cp.failed else 1
 
@@ -83,13 +94,25 @@ def main(argv=None) -> int:
     p_run.add_argument("--sample", type=str, default=None)
     p_run.add_argument("--results-dir", type=str, default=None)
     p_run.add_argument("--cache-dir", type=str, default=None)
-    p_run.add_argument("--workers", type=int, default=2)
+    p_run.add_argument("--workers", type=int, default=1,
+                       help="Number of parallel workers. Default 1 (sequential).")
     p_run.add_argument("--limit", type=int, default=None,
                        help="Cap number of PMIDs (for smoke tests)")
     p_run.add_argument("--resume", action="store_true", default=True)
     p_run.add_argument("--no-resume", dest="resume", action="store_false")
     p_run.add_argument("--retry-failed", action="store_true", default=False,
                        help="Re-attempt PMIDs in checkpoint.failed (e.g. after a rate-limit-induced batch of errors).")
+    p_run.add_argument("--loop", action="store_true", default=False,
+                       help="Auto-resume mode: trip a circuit breaker on consecutive errors, "
+                            "sleep through the 5h subscription cooldown, then resume retrying. "
+                            "Implies --retry-failed each iteration.")
+    p_run.add_argument("--stop-after-consecutive-errors", type=int, default=3,
+                       help="Trip the circuit breaker after this many back-to-back error results. "
+                            "Default 3. Applies to single-batch runs too (set very high to disable).")
+    p_run.add_argument("--cooldown-buffer-minutes", type=int, default=5,
+                       help="Extra minutes to wait beyond the 5h cooldown before resuming. Default 5.")
+    p_run.add_argument("--max-iterations", type=int, default=None,
+                       help="Max number of run/sleep iterations in --loop mode. Default: unlimited.")
     p_run.add_argument("--model", type=str, default="claude-opus-4-7")
     p_run.add_argument("--max-turns", type=int, default=60)
     p_run.set_defaults(func=cmd_run)

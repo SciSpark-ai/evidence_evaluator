@@ -18,6 +18,9 @@ class Checkpoint:
     config: Dict[str, Any] = field(default_factory=dict)
     completed: List[str] = field(default_factory=list)
     failed: List[Dict[str, Any]] = field(default_factory=list)
+    # New fields for circuit breaker / loop mode (default to empty for back-compat).
+    last_stop_reason: str = ""  # "completed" | "limit" | "circuit_breaker" | ""
+    first_error_at_iso: str = ""  # UTC ISO-format timestamp of first error in current batch
 
 
 def write_report(reports_dir: str, pmid: str, markdown: str) -> str:
@@ -77,6 +80,8 @@ def read_checkpoint(path: str) -> Checkpoint:
         config=data.get("config", {}),
         completed=list(data.get("completed", [])),
         failed=list(data.get("failed", [])),
+        last_stop_reason=data.get("last_stop_reason", ""),
+        first_error_at_iso=data.get("first_error_at_iso", ""),
     )
 
 
