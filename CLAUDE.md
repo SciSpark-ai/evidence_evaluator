@@ -52,6 +52,8 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - `eval/trec_pm2020/PROMPT_TEMPLATE.md` — Agent prompt template for one-PMID runs. Uses Python `.format()` placeholders `{pmid}`, `{reports_dir}`, `{json_dir}`; JSON schema example uses `{{`/`}}` escapes. Instructs the agent to read `SKILL.md`, work abstract-only (no full-text fetch), run Stages 0→5, save the Markdown report, then emit a single fenced `\`\`\`json` block.
 - `eval/trec_pm2020/runner.py` — Single-PMID SDK driver. Exports `RunResult` (dataclass), `build_prompt(pmid, reports_dir, json_dir)`, `extract_final_json(transcript)`, `run_one(pmid, ...)`. SDK call isolated in `_run_agent()` (uses `claude_agent_sdk.query()` — one-shot batch API). Status strings: `ok`, `partial_insufficient_data`, `partial_off_distribution`, `max_turns`, `fetch_error`, `invalid_pmid`, `error`.
 - `eval/trec_pm2020/batch.py` — Parallel orchestrator. Exports `run_batch(sample_csv, results_dir, cache_dir, run_id, workers=2, runner=None, resume=True, limit=None, ...)`. Reads `sample_500.csv`, skips PMIDs already in `checkpoint.completed` (when `resume=True`), runs remainder via `ThreadPoolExecutor`, updates `checkpoint.json` atomically after each completion. Runner is injected for testability.
+- `eval/trec_pm2020/cli.py` — argparse CLI entry point. Subcommands: `sample` (regenerate sample_500.csv), `run` (kick off batch), `build-csv` (emit master.csv from JSON), `validate` (sanity-check run).
+- `eval/trec_pm2020/__main__.py` — Module entry for `python -m eval.trec_pm2020 <cmd>`.
 - `tests/` — Dev-only validation tests (not part of installed skill).
 - `paper/` — Claw4S 2026 conference submission (research note, pilot results, submission script).
 
