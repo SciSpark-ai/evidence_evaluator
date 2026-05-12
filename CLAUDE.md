@@ -84,6 +84,26 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 
 Reports in `paper/pilot_results/`. Research note in `paper/research_note.md`.
 
+## TREC PM 2020 Comparison (in progress)
+
+Stratified sample of 500 PMIDs from `qrels-expgains-phase2.txt` (125 per max-grade
+bucket, seed=42). Harness runs the full pipeline via `claude-agent-sdk` on Opus 4.7
+with Tier 1 (abstract-only) input. Outputs land in `results/trec_pm2020/<run_id>/`
+(gitignored). A colleague performs the human comparison against TREC Phase 2 evidence
+tiers externally.
+
+- **Run a smoke test (5 papers):** `tmux new -s trec_smoke "python3 -m eval.trec_pm2020 run --limit 5 --workers 1 --run-id smoke"`
+- **Run the full 500:** `tmux new -s trec_run "python3 -m eval.trec_pm2020 run --workers 2"`
+- **Build master CSV after:** `python3 -m eval.trec_pm2020 build-csv results/trec_pm2020/<run_id>`
+- **Validate completion:** `python3 -m eval.trec_pm2020 validate results/trec_pm2020/<run_id>`
+
+Auth: harness uses `ANTHROPIC_API_KEY` if set, else falls back to OAuth from `claude` CLI
+(subscription billing). The 500-paper run is designed to fit within Max-tier subscription
+limits over a few days; the user controls when LLM runs happen.
+
+Design: `docs/superpowers/specs/2026-05-11-trec-pm2020-batch-eval-harness-design.md`.
+Plan: `docs/superpowers/plans/2026-05-11-trec-pm2020-batch-eval-harness.md`.
+
 ## Claw4S 2026 Submission
 
 - **clawRxiv post:** #272 (final) — http://18.118.210.52/api/posts/272
