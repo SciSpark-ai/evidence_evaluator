@@ -33,6 +33,7 @@ python tests/eval/test_qrels.py                  # eval harness: qrels parser
 python tests/eval/test_sample.py                 # eval harness: stratified sampler (8/8 pass)
 python tests/eval/test_pubmed.py                 # eval harness: PubMed efetch + cache (7/7 pass)
 python tests/eval/test_emit.py                   # eval harness: emit writers + build_master_csv (24/24 pass)
+python tests/eval/test_runner.py                 # eval harness: prompt builder + JSON extractor (9/9 pass)
 ```
 
 Tests use a custom pass/fail counter (not pytest). They print results to stdout.
@@ -47,6 +48,8 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - `eval/trec_pm2020/sample.py` — Stratified 500-PMID sampler. Exports `compute_max_grades()`, `stratified_sample()`, `SampleRow`, `write_sample_csv()`. Groups unique PMIDs by max-grade across topics, then `random.Random(seed=42).sample(bucket, 125)` per bucket {8, 4, 2, 1}.
 - `eval/trec_pm2020/pubmed.py` — PubMed E-utilities efetch with retry + on-disk cache. Exports `fetch_abstract(pmid, cache_dir, ...)`, `PubMedError`. Caches to `data/trec_pm2020/abstracts_cache/<pmid>.xml`. Retries 5xx (exp backoff 1s/4s/16s); raises `PubMedError` on 4xx. Respects `NCBI_API_KEY` env var (10 req/s vs 3 req/s default).
 - `eval/trec_pm2020/emit.py` — Output writers for the batch harness. Exports `write_report()`, `write_json()`, `append_log()`, `read_checkpoint()`, `write_checkpoint()`, `Checkpoint`, and `build_master_csv()`. `build_master_csv(qrels_path, sample_csv, json_dir, out_path)` joins per-paper JSON dumps with the qrels file to produce a flat master.csv (one row per topic×pmid pair, TREC fields + EE fields).
+- `eval/trec_pm2020/PROMPT_TEMPLATE.md` — Agent prompt template for one-PMID runs. Uses Python `.format()` placeholders `{pmid}`, `{reports_dir}`, `{json_dir}`; JSON schema example uses `{{`/`}}` escapes. Instructs the agent to read `SKILL.md`, work abstract-only (no full-text fetch), run Stages 0→5, save the Markdown report, then emit a single fenced `\`\`\`json` block.
+- `eval/trec_pm2020/runner.py` — Single-PMID SDK driver. Exports `RunResult` (dataclass), `build_prompt(pmid, reports_dir, json_dir)`, `extract_final_json(transcript)`, `run_one(pmid, ...)`. SDK call isolated in `_run_agent()` (uses `claude_agent_sdk.query()` — one-shot batch API). Status strings: `ok`, `partial_insufficient_data`, `partial_off_distribution`, `max_turns`, `fetch_error`, `invalid_pmid`, `error`.
 - `tests/` — Dev-only validation tests (not part of installed skill).
 - `paper/` — Claw4S 2026 conference submission (research note, pilot results, submission script).
 
