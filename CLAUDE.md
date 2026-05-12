@@ -31,6 +31,7 @@ python tests/test_stage3_math.py                 # 147/147 pass
 python tests/test_stage5_report.py               # 70/70 pass
 python tests/eval/test_qrels.py                  # eval harness: qrels parser
 python tests/eval/test_sample.py                 # eval harness: stratified sampler (8/8 pass)
+python tests/eval/test_pubmed.py                 # eval harness: PubMed efetch + cache (7/7 pass)
 ```
 
 Tests use a custom pass/fail counter (not pytest). They print results to stdout.
@@ -43,6 +44,7 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - `skills/evidence-evaluator/references/` — Stage specs the agent reads before executing each stage.
 - `eval/trec_pm2020/qrels.py` — Parses `qrels-expgains-phase2.txt`. Exports `parse_qrels()`, `QrelRow`.
 - `eval/trec_pm2020/sample.py` — Stratified 500-PMID sampler. Exports `compute_max_grades()`, `stratified_sample()`, `SampleRow`, `write_sample_csv()`. Groups unique PMIDs by max-grade across topics, then `random.Random(seed=42).sample(bucket, 125)` per bucket {8, 4, 2, 1}.
+- `eval/trec_pm2020/pubmed.py` — PubMed E-utilities efetch with retry + on-disk cache. Exports `fetch_abstract(pmid, cache_dir, ...)`, `PubMedError`. Caches to `data/trec_pm2020/abstracts_cache/<pmid>.xml`. Retries 5xx (exp backoff 1s/4s/16s); raises `PubMedError` on 4xx. Respects `NCBI_API_KEY` env var (10 req/s vs 3 req/s default).
 - `tests/` — Dev-only validation tests (not part of installed skill).
 - `paper/` — Claw4S 2026 conference submission (research note, pilot results, submission script).
 
