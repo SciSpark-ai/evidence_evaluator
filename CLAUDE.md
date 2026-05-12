@@ -15,6 +15,9 @@ skills/evidence-evaluator/
   pipeline/stage3_math.py           ← Stage 3: deterministic math (no LLM)
   pipeline/stage5_report.py         ← Stage 5: score engine + report assembly
   references/                       ← Stage specs, formulas, eval framework
+eval/trec_pm2020/                   ← TREC PM 2020 batch evaluation harness
+data/trec_pm2020/                   ← qrels + abstracts cache (cache gitignored)
+results/trec_pm2020/                ← Harness output files (gitignored)
 tests/                              ← Development only (not part of skill package)
 paper/                              ← Claw4S conference research note + pilot results
 ```
@@ -89,3 +92,4 @@ Reports in `paper/pilot_results/`. Research note in `paper/research_note.md`.
 - Stages 0, 1, 2, 4 are agent reasoning tasks — no Python modules needed
 - All Python commands must run from `skills/evidence-evaluator/` directory for imports to resolve
 - Reference docs in `references/` contain explicit signaling questions (RoB 2.0), classification tables (effect size type, surrogate endpoint, objective/subjective outcome), and fallback hierarchies (NNT threshold, domain N) to minimize agent interpretation variance
+- TREC PM 2020 batch harness additionally requires: `pip install claude-agent-sdk requests`
