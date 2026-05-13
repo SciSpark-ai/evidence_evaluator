@@ -167,11 +167,82 @@ def test_build_master_csv_basic():
         shutil.rmtree(tmpdir)
 
 
+def test_build_master_csv_nested_layout():
+    """JSON dumps live under per-status subdirs (e.g. json/ok/A.json) — builder must still find them."""
+    tmpdir = tempfile.mkdtemp()
+    try:
+        json_dir = os.path.join(tmpdir, "json")
+        # Flat-layout JSON for old runs (B) and nested-layout JSON for reorganized runs (A under ok/, C under partial_off_distribution/)
+        os.makedirs(os.path.join(json_dir, "ok"))
+        os.makedirs(os.path.join(json_dir, "partial_off_distribution"))
+
+        # A: nested under ok/
+        with open(os.path.join(json_dir, "ok", "A.json"), "w") as f:
+            json.dump({
+                "pmid": "A", "status": "ok",
+                "stage0": {"study_type": "RCT_intervention"},
+                "stage5": {"suggested_score": 5},
+                "runtime_s": 100,
+            }, f)
+        # B: flat (back-compat — old layout, file at root)
+        with open(os.path.join(json_dir, "B.json"), "w") as f:
+            json.dump({
+                "pmid": "B", "status": "partial_insufficient_data",
+                "stage0": {"study_type": "observational"},
+                "stage5": {"suggested_score": 2},
+                "runtime_s": 50,
+            }, f)
+        # C: nested under partial_off_distribution/
+        with open(os.path.join(json_dir, "partial_off_distribution", "C.json"), "w") as f:
+            json.dump({
+                "pmid": "C", "status": "partial_off_distribution",
+                "stage0": {"study_type": "narrative_review"},
+                "stage5": {"suggested_score": 1},
+                "runtime_s": 30,
+            }, f)
+
+        qrels_path = os.path.join(tmpdir, "qrels.txt")
+        with open(qrels_path, "w") as f:
+            f.write("1 0 A 8\n2 0 B 4\n3 0 C 2\n")
+
+        sample_csv = os.path.join(tmpdir, "sample.csv")
+        with open(sample_csv, "w") as f:
+            f.write("pmid,max_grade,all_topic_grades\n")
+            f.write("A,8,1:8\n")
+            f.write("B,4,2:4\n")
+            f.write("C,2,3:2\n")
+
+        master_path = os.path.join(tmpdir, "master.csv")
+        from eval.trec_pm2020.emit import build_master_csv
+        n = build_master_csv(qrels_path, sample_csv, json_dir, master_path)
+        check("rows written", n, 3)
+
+        import csv
+        with open(master_path) as f:
+            rows = list(csv.DictReader(f))
+        by_pmid = {r["pmid"]: r for r in rows}
+        # Nested JSONs were read successfully (status would be "missing" otherwise)
+        check("A (nested) status", by_pmid["A"]["run_status"], "ok")
+        check("A ee_score from nested JSON", by_pmid["A"]["ee_score"], "5")
+        check("B (flat) status", by_pmid["B"]["run_status"], "partial_insufficient_data")
+        check("C (nested) status", by_pmid["C"]["run_status"], "partial_off_distribution")
+        check("C ee_study_type from nested JSON", by_pmid["C"]["ee_study_type"], "narrative_review")
+        # report_path reflects the status subdir when JSON was nested
+        check("A report_path nested", by_pmid["A"]["report_path"], "reports/ok/evidence_report_A.md")
+        check("C report_path nested", by_pmid["C"]["report_path"],
+              "reports/partial_off_distribution/evidence_report_C.md")
+        # For flat layout, report_path falls back to whatever's in the JSON (or "reports/evidence_report_B.md" if computed)
+        check("B report_path flat", by_pmid["B"]["report_path"], "reports/evidence_report_B.md")
+    finally:
+        shutil.rmtree(tmpdir)
+
+
 if __name__ == "__main__":
     for fn in [test_write_report_creates_file, test_write_json_pretty,
                test_append_log_appends, test_checkpoint_roundtrip,
                test_checkpoint_missing_returns_empty, test_checkpoint_atomic_replace,
-               test_build_master_csv_basic]:
+               test_build_master_csv_basic,
+               test_build_master_csv_nested_layout]:
         print(f"\n{fn.__name__}")
         fn()
     print(f"\n{'='*50}\nPASS: {PASS}  FAIL: {FAIL}")

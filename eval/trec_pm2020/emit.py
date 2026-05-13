@@ -146,6 +146,15 @@ def build_master_csv(
         for row in reader:
             sample_max[row["pmid"]] = int(row["max_grade"])
 
+    # Build {pmid: path} index by walking json_dir recursively.
+    # Supports both flat layout (json/<pmid>.json) and nested-by-status
+    # (json/<status>/<pmid>.json) after a post-run reorganization.
+    pmid_to_path: Dict[str, str] = {}
+    for root, _dirs, files in os.walk(json_dir):
+        for fn in files:
+            if fn.endswith(".json"):
+                pmid_to_path[fn[:-5]] = os.path.join(root, fn)
+
     columns = [
         "topic_id", "pmid", "trec_grade", "max_grade",
         "ee_score", "ee_study_type", "ee_overall_concern",
@@ -162,11 +171,19 @@ def build_master_csv(
         for r in parse_qrels(qrels_path):
             if r.pmid not in sample_max:
                 continue
-            json_path = os.path.join(json_dir, f"{r.pmid}.json")
+            json_path = pmid_to_path.get(r.pmid, os.path.join(json_dir, f"{r.pmid}.json"))
             data: Dict[str, Any] = {}
             if os.path.exists(json_path):
                 with open(json_path) as f:
                     data = json.load(f)
+            # Compute report_path from the actual JSON location so it stays in sync
+            # if the user reorganized json/ into status subdirs.
+            rel_from_json_dir = os.path.relpath(json_path, json_dir)
+            parts = rel_from_json_dir.split(os.sep)
+            if len(parts) >= 2:
+                report_path = os.path.join("reports", parts[0], f"evidence_report_{r.pmid}.md")
+            else:
+                report_path = f"reports/evidence_report_{r.pmid}.md"
             row = {
                 "topic_id": r.topic,
                 "pmid": r.pmid,
@@ -180,7 +197,7 @@ def build_master_csv(
                 "ee_dor": _get(data, "stage3", "dor"),
                 "ee_model": data.get("model", ""),
                 "ee_total_cost_usd": data.get("total_cost_usd", ""),
-                "report_path": data.get("report_path", ""),
+                "report_path": report_path,
                 "json_path": os.path.relpath(json_path, os.path.dirname(out_path)),
                 "run_status": data.get("status", "missing"),
                 "runtime_s": data.get("runtime_s", ""),
