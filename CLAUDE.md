@@ -92,6 +92,11 @@ with Tier 1 (abstract-only) input. Outputs land in `results/trec_pm2020/<run_id>
 (gitignored). A colleague performs the human comparison against TREC Phase 2 evidence
 tiers externally.
 
+`data/trec_pm2020/extra_60.csv` is a subset CSV (the first 20 PMIDs of each non-grade-8
+bucket, deterministic against sample_500.csv) used for a follow-up batch that filled in
+the grade-4/2/1 tiers so cross-tier comparison is possible without finishing all 500.
+Pass it via `--sample data/trec_pm2020/extra_60.csv`.
+
 - **Run a smoke test (5 papers):** `nohup python3 -m eval.trec_pm2020 run --limit 5 --workers 1 --run-id smoke > /tmp/trec_smoke.log 2>&1 & disown`
 - **Unattended loop run (recommended for full sample on subscription):** `nohup python3 -m eval.trec_pm2020 run --workers 1 --loop --run-id <id> --stop-after-consecutive-errors 3 > /tmp/trec_loop.log 2>&1 & disown`
   - Circuit breaker trips after 3 back-to-back error results (typical rate-limit signature), then sleeps until 5h + buffer after the first failure, then auto-retries failed PMIDs and continues. Survives subscription cooldowns unattended.
