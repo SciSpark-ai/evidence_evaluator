@@ -3,3 +3,7 @@ __pycache__/
 *.pyo
 .env
 evidence_report_*.md
+
+# TREC PM 2020 batch eval harness
+data/trec_pm2020/abstracts_cache/
+results/trec_pm2020/

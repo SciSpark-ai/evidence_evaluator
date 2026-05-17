@@ -15,6 +15,9 @@ skills/evidence-evaluator/
   pipeline/stage3_math.py           ← Stage 3: deterministic math (no LLM)
   pipeline/stage5_report.py         ← Stage 5: score engine + report assembly
   references/                       ← Stage specs, formulas, eval framework
+eval/trec_pm2020/                   ← TREC PM 2020 batch evaluation harness
+data/trec_pm2020/                   ← qrels + abstracts cache (cache gitignored)
+results/trec_pm2020/                ← Harness output files (gitignored)
 tests/                              ← Development only (not part of skill package)
 paper/                              ← Claw4S conference research note + pilot results
 ```
@@ -26,6 +29,12 @@ pip install scipy statsmodels numpy
 
 python tests/test_stage3_math.py                 # 147/147 pass
 python tests/test_stage5_report.py               # 70/70 pass
+python tests/eval/test_qrels.py                  # eval harness: qrels parser
+python tests/eval/test_sample.py                 # eval harness: stratified sampler (8/8 pass)
+python tests/eval/test_pubmed.py                 # eval harness: PubMed efetch + cache (7/7 pass)
+python tests/eval/test_emit.py                   # eval harness: emit writers + build_master_csv (33/33 pass)
+python tests/eval/test_runner.py                 # eval harness: prompt builder + JSON extractor (9/9 pass)
+python tests/eval/test_batch.py                  # eval harness: parallel orchestrator + checkpoint/resume (8/8 pass)
 ```
 
 Tests use a custom pass/fail counter (not pytest). They print results to stdout.
@@ -36,6 +45,15 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 - `skills/evidence-evaluator/pipeline/stage3_math.py` — Deterministic math audit. Exports `run_stage3()`, `compute_fragility_index`, `compute_nnt`, `compute_dor`, etc. Routes by study type.
 - `skills/evidence-evaluator/pipeline/stage5_report.py` — Score rule engine + report assembly. Exports `compute_suggested_score()`, `assemble_report()`, `deduplicate_stage4_deltas()`.
 - `skills/evidence-evaluator/references/` — Stage specs the agent reads before executing each stage.
+- `eval/trec_pm2020/qrels.py` — Parses `qrels-expgains-phase2.txt`. Exports `parse_qrels()`, `QrelRow`.
+- `eval/trec_pm2020/sample.py` — Stratified 500-PMID sampler. Exports `compute_max_grades()`, `stratified_sample()`, `SampleRow`, `write_sample_csv()`. Groups unique PMIDs by max-grade across topics, then `random.Random(seed=42).sample(bucket, 125)` per bucket {8, 4, 2, 1}.
+- `eval/trec_pm2020/pubmed.py` — PubMed E-utilities efetch with retry + on-disk cache. Exports `fetch_abstract(pmid, cache_dir, ...)`, `PubMedError`. Caches to `data/trec_pm2020/abstracts_cache/<pmid>.xml`. Retries 5xx (exp backoff 1s/4s/16s); raises `PubMedError` on 4xx. Respects `NCBI_API_KEY` env var (10 req/s vs 3 req/s default).
+- `eval/trec_pm2020/emit.py` — Output writers for the batch harness. Exports `write_report()`, `write_json()`, `append_log()`, `read_checkpoint()`, `write_checkpoint()`, `Checkpoint`, and `build_master_csv()`. `build_master_csv(qrels_path, sample_csv, json_dir, out_path)` joins per-paper JSON dumps with the qrels file to produce a flat master.csv (one row per topic×pmid pair, TREC fields + EE fields). Walks `json_dir` recursively, so both the flat write-time layout (`json/<pmid>.json`) and a post-run reorganization into per-status subdirs (`json/<status>/<pmid>.json`) work; `report_path` is derived from the JSON's on-disk location so it tracks reorganization.
+- `eval/trec_pm2020/PROMPT_TEMPLATE.md` — Agent prompt template for one-PMID runs. Uses Python `.format()` placeholders `{pmid}`, `{reports_dir}`, `{json_dir}`; JSON schema example uses `{{`/`}}` escapes. Instructs the agent to read `SKILL.md`, work abstract-only (no full-text fetch), run Stages 0→5, save the Markdown report, then emit a single fenced `\`\`\`json` block.
+- `eval/trec_pm2020/runner.py` — Single-PMID SDK driver. Exports `RunResult` (dataclass), `build_prompt(pmid, reports_dir, json_dir)`, `extract_final_json(transcript)`, `run_one(pmid, ...)`. SDK call isolated in `_run_agent()` (uses `claude_agent_sdk.query()` — one-shot batch API). Status strings: `ok`, `partial_insufficient_data`, `partial_off_distribution`, `max_turns`, `fetch_error`, `invalid_pmid`, `error`.
+- `eval/trec_pm2020/batch.py` — Parallel orchestrator. Exports `run_batch(sample_csv, results_dir, cache_dir, run_id, workers=2, runner=None, resume=True, limit=None, ...)`. Reads `sample_500.csv`, skips PMIDs already in `checkpoint.completed` (when `resume=True`), runs remainder via `ThreadPoolExecutor`, updates `checkpoint.json` atomically after each completion. Runner is injected for testability.
+- `eval/trec_pm2020/cli.py` — argparse CLI entry point. Subcommands: `sample` (regenerate sample_500.csv), `run` (kick off batch), `build-csv` (emit master.csv from JSON), `validate` (sanity-check run).
+- `eval/trec_pm2020/__main__.py` — Module entry for `python -m eval.trec_pm2020 <cmd>`.
 - `tests/` — Dev-only validation tests (not part of installed skill).
 - `paper/` — Claw4S 2026 conference submission (research note, pilot results, submission script).
 
@@ -66,6 +84,48 @@ Tests use a custom pass/fail counter (not pytest). They print results to stdout.
 
 Reports in `paper/pilot_results/`. Research note in `paper/research_note.md`.
 
+## TREC PM 2020 Comparison (in progress)
+
+Stratified sample of 500 PMIDs from `qrels-expgains-phase2.txt` (125 per max-grade
+bucket, seed=42). Harness runs the full pipeline via `claude-agent-sdk` on Opus 4.7
+with Tier 1 (abstract-only) input. Outputs land in `results/trec_pm2020/<run_id>/`
+(gitignored). A colleague performs the human comparison against TREC Phase 2 evidence
+tiers externally.
+
+`data/trec_pm2020/extra_60.csv` is a subset CSV (the first 20 PMIDs of each non-grade-8
+bucket, deterministic against sample_500.csv) used for a follow-up batch that filled in
+the grade-4/2/1 tiers so cross-tier comparison is possible without finishing all 500.
+Pass it via `--sample data/trec_pm2020/extra_60.csv`.
+
+- **Run a smoke test (5 papers):** `nohup python3 -m eval.trec_pm2020 run --limit 5 --workers 1 --run-id smoke > /tmp/trec_smoke.log 2>&1 & disown`
+- **Unattended loop run (recommended for full sample on subscription):** `nohup python3 -m eval.trec_pm2020 run --workers 1 --loop --run-id <id> --stop-after-consecutive-errors 3 > /tmp/trec_loop.log 2>&1 & disown`
+  - Circuit breaker trips after 3 back-to-back error results (typical rate-limit signature), then sleeps until 5h + buffer after the first failure, then auto-retries failed PMIDs and continues. Survives subscription cooldowns unattended.
+- **One-off resume after a manual halt (retry the failed ones too):** `python3 -m eval.trec_pm2020 run --workers 1 --run-id <existing_run_id> --retry-failed`
+- **Watch progress live:** `tail -f results/trec_pm2020/<run_id>/progress.tsv`
+- **Build master CSV after:** `python3 -m eval.trec_pm2020 build-csv results/trec_pm2020/<run_id>`
+- **Validate completion:** `python3 -m eval.trec_pm2020 validate results/trec_pm2020/<run_id>`
+
+`progress.tsv` columns (15): `timestamp, pmid, status, score, study_type, runtime_s, num_turns,
+input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens, total_cost_usd,
+completed, failed, total`. Per-paper JSON dumps include `sdk_meta` (full SDK
+telemetry: usage breakdown, total_cost_usd, model_usage, api_error_status, etc.).
+
+`master.csv` includes an `ee_model` column so the human reviewer can filter by which
+model produced each paper. For run_id=`smoke`: the first 35 papers were generated on
+Opus 4.7; the remaining 465 are on Sonnet 4.6 (subscription cap on Opus exhausted faster
+than feasible for the full 500 in this session window).
+
+Each run writes four artifacts to `results/trec_pm2020/<run_id>/`: `reports/*.md`, `json/*.json`,
+`run_log.jsonl` (per-event JSONL), `progress.tsv` (tail-friendly TSV — one row per paper),
+and `checkpoint.json` (atomic, drives `--resume`).
+
+Auth: harness uses `ANTHROPIC_API_KEY` if set, else falls back to OAuth from `claude` CLI
+(subscription billing). The 500-paper run is designed to fit within Max-tier subscription
+limits over a few days; the user controls when LLM runs happen.
+
+Design: `docs/superpowers/specs/2026-05-11-trec-pm2020-batch-eval-harness-design.md`.
+Plan: `docs/superpowers/plans/2026-05-11-trec-pm2020-batch-eval-harness.md`.
+
 ## Claw4S 2026 Submission
 
 - **clawRxiv post:** #272 (final) — http://18.118.210.52/api/posts/272
@@ -89,3 +149,4 @@ Reports in `paper/pilot_results/`. Research note in `paper/research_note.md`.
 - Stages 0, 1, 2, 4 are agent reasoning tasks — no Python modules needed
 - All Python commands must run from `skills/evidence-evaluator/` directory for imports to resolve
 - Reference docs in `references/` contain explicit signaling questions (RoB 2.0), classification tables (effect size type, surrogate endpoint, objective/subjective outcome), and fallback hierarchies (NNT threshold, domain N) to minimize agent interpretation variance
+- TREC PM 2020 batch harness additionally requires: `pip install claude-agent-sdk requests`
